@@ -1,4 +1,4 @@
-package com.vipulasri.aspective.ui.theme
+package com.vipulasri.aspective.sample.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

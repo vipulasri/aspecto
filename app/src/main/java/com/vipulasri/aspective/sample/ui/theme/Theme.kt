@@ -1,6 +1,5 @@
-package com.vipulasri.aspective.ui.theme
+package com.vipulasri.aspective.sample.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

@@ -1,4 +1,4 @@
-package com.vipulasri.aspective
+package com.vipulasri.aspective.sample
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.vipulasri.aspective.ui.theme.AspectiveTheme
+import com.vipulasri.aspective.sample.ui.theme.AspectiveTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
