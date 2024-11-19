@@ -20,5 +20,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Aspective"
-include(":app")
+include(":sample")
 include(":aspective")
