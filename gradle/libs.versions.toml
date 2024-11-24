@@ -19,6 +19,7 @@ androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecyc
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 
 androidx-compose-bom = "androidx.compose:compose-bom:2024.11.00"
+androidx-compose-foundation = { module = "androidx.compose.foundation:foundation" }
 androidx-compose-ui = { module = "androidx.compose.ui:ui" }
 androidx-compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
 androidx-compose-tooling = { module = "androidx.compose.ui:ui-tooling" }
@@ -32,7 +33,7 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [bundles]
-compose = ["androidx-compose-ui", "androidx-compose-ui-graphics", "androidx-compose-toolingPreview"]
+compose = ["androidx-compose-foundation", "androidx-compose-ui", "androidx-compose-ui-graphics", "androidx-compose-toolingPreview"]
 compose-debug = ["androidx-compose-tooling", "androidx-compose-ui-test-manifest"]
 
 [plugins]
