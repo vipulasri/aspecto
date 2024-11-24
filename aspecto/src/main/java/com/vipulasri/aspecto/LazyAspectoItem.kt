@@ -17,7 +17,7 @@ data class LazyAspectoItem(
 
 class LazyAspectoLayoutScope {
 
-    private val items = mutableListOf<LazyAspectoItem>()
+    internal val items = mutableListOf<LazyAspectoItem>()
 
     fun item(
         aspectRatio: Float,
