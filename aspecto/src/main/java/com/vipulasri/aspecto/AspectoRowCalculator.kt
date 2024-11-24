@@ -57,6 +57,30 @@ class AspectoRowCalculator(
         }
     }
 
+    fun computeLayout() {
+        rows.forEach { rowItems ->
+            val effectiveWidth = availableWidth - (horizontalPadding * (rowItems.size - 1))
+            val aspectRatioSum = rowItems.sumOf { it.aspectRatio.toDouble() }.toFloat()
+            val rowHeight = calculateRowHeight(effectiveWidth, aspectRatioSum)
+                .coerceIn(minRowHeight.toFloat(), maxRowHeight.toFloat())
+
+            rowItems.forEach { item ->
+                item.height = rowHeight.toInt()
+            }
+
+            var remainingWidth = effectiveWidth
+            rowItems.forEachIndexed { index, item ->
+                item.width = if (index == rowItems.lastIndex) {
+                    remainingWidth
+                } else {
+                    (effectiveWidth * (item.aspectRatio / aspectRatioSum)).toInt().also {
+                        remainingWidth -= it
+                    }
+                }
+            }
+        }
+    }
+
     private fun calculateRowScore(rowItems: List<LazyAspectoItem>): Float {
         val aspectRatioSum = rowItems.sumOf { it.aspectRatio.toDouble() }.toFloat()
         val effectiveWidth = availableWidth - (horizontalPadding * (rowItems.size - 1))
