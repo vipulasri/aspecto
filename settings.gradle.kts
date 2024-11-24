@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Aspective"
+rootProject.name = "Aspecto"
 include(":sample")
-include(":aspective")
+include(":aspecto")
