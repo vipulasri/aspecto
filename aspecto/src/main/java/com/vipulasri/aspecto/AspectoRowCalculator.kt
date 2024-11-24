@@ -6,14 +6,12 @@ import kotlin.math.abs
  * Created by Vipul Asri on 23/11/24.
  */
 
-class AspectoRowCalculator(
+internal class AspectoRowCalculator(
     private val maxRowHeight: Int = DEFAULT_MAX_ROW_HEIGHT,
-    private val horizontalPadding: Int = 0,
-    private val verticalPadding: Int = 0
+    private val horizontalPadding: Int = 0
 ) {
     companion object {
         const val DEFAULT_MAX_ROW_HEIGHT = 600
-        const val VALID_ITEM_SLACK_THRESHOLD = 0.2f
         private const val MAX_ITEMS_PER_ROW = 3
     }
 
@@ -81,36 +79,32 @@ class AspectoRowCalculator(
         }
     }
 
+    fun getRows(): List<List<LazyAspectoItem>> = rows
+
     private fun calculateRowScore(rowItems: List<LazyAspectoItem>): Float {
         val aspectRatioSum = rowItems.sumOf { it.aspectRatio.toDouble() }.toFloat()
         val effectiveWidth = availableWidth - (horizontalPadding * (rowItems.size - 1))
-        val rowHeight = calculateRowHeight(effectiveWidth, aspectRatioSum)
 
+        // Calculate row height based on available width and aspect ratios
+        val rowHeight = (effectiveWidth / aspectRatioSum).coerceIn(
+            minRowHeight.toFloat(),
+            maxRowHeight.toFloat()
+        )
+
+        // If we can't fit within height bounds, return infinity
         if (rowHeight > maxRowHeight || rowHeight < minRowHeight) {
             return Float.POSITIVE_INFINITY
         }
 
-        val itemSlacks = rowItems.map { item ->
-            val actualWidth = rowHeight * item.aspectRatio
-            val expectedWidth = effectiveWidth * (item.aspectRatio / aspectRatioSum)
-            abs(actualWidth - expectedWidth) / expectedWidth
-        }
+        // Calculate total width using the computed height
+        val totalWidth = rowItems.sumOf { (rowHeight * it.aspectRatio).toDouble() }.toFloat()
 
-        if (itemSlacks.any { it > VALID_ITEM_SLACK_THRESHOLD }) {
-            return Float.POSITIVE_INFINITY
-        }
-
-        val targetHeight = maxRowHeight * 0.8f
-        return abs(rowHeight - targetHeight) / targetHeight
+        // Score based on how well we fill the available width
+        return abs(totalWidth - effectiveWidth)
     }
 
     private fun calculateRowHeight(width: Int, aspectRatioSum: Float): Float {
         if (aspectRatioSum == 0f) return minRowHeight.toFloat()
-        val desiredHeight = width / aspectRatioSum
-
-        val minAllowedHeight = (minRowHeight * (1 - VALID_ITEM_SLACK_THRESHOLD))
-            .coerceAtLeast(50f)
-
-        return desiredHeight.coerceIn(minAllowedHeight, maxRowHeight.toFloat())
+        return (width / aspectRatioSum).coerceIn(minRowHeight.toFloat(), maxRowHeight.toFloat())
     }
 }
