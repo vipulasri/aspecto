@@ -41,6 +41,8 @@ android {
 
 dependencies {
 
+    implementation(project(":aspecto"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
