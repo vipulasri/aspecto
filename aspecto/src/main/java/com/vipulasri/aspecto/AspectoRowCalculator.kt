@@ -17,18 +17,18 @@ internal class AspectoRowCalculator(
 
     private val minRowHeight = (maxRowHeight * 0.5f).toInt()
     private var availableWidth = 0
-    private val rows = mutableListOf<List<LazyAspectoItem>>()
+    private val rows = mutableListOf<List<AspectoLayoutInfo>>()
 
     fun setMaxRowWidth(maxWidth: Int) {
         availableWidth = maxWidth
     }
 
-    fun addItems(items: List<LazyAspectoItem>) {
+    fun addItems(items: List<AspectoLayoutInfo>) {
         rows.clear()
         var currentIndex = 0
 
         while (currentIndex < items.size) {
-            var bestRow: List<LazyAspectoItem>? = null
+            var bestRow: List<AspectoLayoutInfo>? = null
             var bestScore = Float.POSITIVE_INFINITY
 
             for (numItems in 1..MAX_ITEMS_PER_ROW) {
@@ -79,9 +79,9 @@ internal class AspectoRowCalculator(
         }
     }
 
-    fun getRows(): List<List<LazyAspectoItem>> = rows
+    fun getRows(): List<List<AspectoLayoutInfo>> = rows
 
-    private fun calculateRowScore(rowItems: List<LazyAspectoItem>): Float {
+    private fun calculateRowScore(rowItems: List<AspectoLayoutInfo>): Float {
         val aspectRatioSum = rowItems.sumOf { it.aspectRatio.toDouble() }.toFloat()
         val effectiveWidth = availableWidth - (horizontalPadding * (rowItems.size - 1))
 

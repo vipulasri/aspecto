@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
  * Created by Vipul Asri on 23/11/24.
  */
 
-data class LazyAspectoItem(
+data class AspectoLayoutInfo(
     val aspectRatio: Float,
     val key: Any?,
     val contentType: Any?,
@@ -15,9 +15,9 @@ data class LazyAspectoItem(
     var height: Int = 0
 )
 
-class LazyAspectoLayoutScope {
+class AspectoLayoutScope {
 
-    internal val items = mutableListOf<LazyAspectoItem>()
+    internal val items = mutableListOf<AspectoLayoutInfo>()
 
     fun item(
         aspectRatio: Float,
@@ -26,7 +26,7 @@ class LazyAspectoLayoutScope {
         content: @Composable () -> Unit
     ) {
         items.add(
-            LazyAspectoItem(
+            AspectoLayoutInfo(
                 aspectRatio = aspectRatio,
                 key = key,
                 contentType = contentType,
