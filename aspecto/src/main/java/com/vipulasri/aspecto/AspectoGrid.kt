@@ -69,17 +69,17 @@ fun AspectoGrid(
         ) {
             items(
                 count = rows.size,
-                key = { index -> rows[index].firstOrNull()?.key ?: index }
+                key = { index -> rows[index].items.firstOrNull()?.key ?: index }
             ) { rowIndex ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(with(density) { rows[rowIndex].first().height.toDp() }),
+                        .height(with(density) { rows[rowIndex].items.first().height.toDp() }),
                     horizontalArrangement = Arrangement.spacedBy(
                         itemPadding.calculateStartPadding(LayoutDirection.Ltr)
                     )
                 ) {
-                    rows[rowIndex].forEach { item ->
+                    rows[rowIndex].items.forEach { item ->
                         Box(
                             modifier = Modifier
                                 .width(with(density) { item.width.toDp() })

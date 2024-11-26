@@ -17,7 +17,7 @@ internal class AspectoRowCalculator(
 
     private val minRowHeight = (maxRowHeight * 0.5f).toInt()
     private var availableWidth = 0
-    private val rows = mutableListOf<List<AspectoLayoutInfo>>()
+    private val rows = mutableListOf<AspectoRow>()
 
     fun setMaxRowWidth(maxWidth: Int) {
         availableWidth = maxWidth
@@ -44,31 +44,31 @@ internal class AspectoRowCalculator(
             }
 
             bestRow?.let {
-                rows.add(it)
+                rows.add(AspectoRow(it))
                 currentIndex += it.size
             } ?: run {
                 val remainingItems = items.size - currentIndex
                 val rowSize = minOf(remainingItems, MAX_ITEMS_PER_ROW)
-                rows.add(items.subList(currentIndex, currentIndex + rowSize))
+                rows.add(AspectoRow(items.subList(currentIndex, currentIndex + rowSize)))
                 currentIndex += rowSize
             }
         }
     }
 
     fun computeLayout() {
-        rows.forEach { rowItems ->
-            val effectiveWidth = availableWidth - (horizontalPadding * (rowItems.size - 1))
-            val aspectRatioSum = rowItems.sumOf { it.aspectRatio.toDouble() }.toFloat()
+        rows.forEach { row ->
+            val effectiveWidth = availableWidth - (horizontalPadding * (row.items.size - 1))
+            val aspectRatioSum = row.items.sumOf { it.aspectRatio.toDouble() }.toFloat()
             val rowHeight = calculateRowHeight(effectiveWidth, aspectRatioSum)
                 .coerceIn(minRowHeight.toFloat(), maxRowHeight.toFloat())
 
-            rowItems.forEach { item ->
+            row.items.forEach { item ->
                 item.height = rowHeight.toInt()
             }
 
             var remainingWidth = effectiveWidth
-            rowItems.forEachIndexed { index, item ->
-                item.width = if (index == rowItems.lastIndex) {
+            row.items.forEachIndexed { index, item ->
+                item.width = if (index == row.items.lastIndex) {
                     remainingWidth
                 } else {
                     (effectiveWidth * (item.aspectRatio / aspectRatioSum)).toInt().also {
@@ -79,7 +79,7 @@ internal class AspectoRowCalculator(
         }
     }
 
-    fun getRows(): List<List<AspectoLayoutInfo>> = rows
+    fun getRows(): List<AspectoRow> = rows
 
     private fun calculateRowScore(rowItems: List<AspectoLayoutInfo>): Float {
         val aspectRatioSum = rowItems.sumOf { it.aspectRatio.toDouble() }.toFloat()
