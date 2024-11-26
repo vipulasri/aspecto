@@ -17,7 +17,8 @@ data class AspectoLayoutInfo(
 
 class AspectoLayoutScope {
 
-    internal val items = mutableListOf<AspectoLayoutInfo>()
+    private val _items = mutableListOf<AspectoLayoutInfo>()
+    val items: List<AspectoLayoutInfo> = _items
 
     fun item(
         aspectRatio: Float,
@@ -25,7 +26,7 @@ class AspectoLayoutScope {
         contentType: Any? = null,
         content: @Composable () -> Unit
     ) {
-        items.add(
+        _items.add(
             AspectoLayoutInfo(
                 aspectRatio = aspectRatio,
                 key = key,
@@ -33,5 +34,24 @@ class AspectoLayoutScope {
                 content = content
             )
         )
+    }
+
+    fun <T> items(
+        items: List<T>,
+        key: ((item: T) -> Any)? = null,
+        aspectRatio: (T) -> Float,
+        contentType: ((item: T) -> Any)? = null,
+        itemContent: @Composable (T) -> Unit
+    ) {
+        items.forEach { item ->
+            _items.add(
+                AspectoLayoutInfo(
+                    key = key?.invoke(item),
+                    aspectRatio = aspectRatio(item),
+                    contentType = contentType?.invoke(item),
+                    content = { itemContent(item) }
+                )
+            )
+        }
     }
 }

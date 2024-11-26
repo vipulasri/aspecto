@@ -61,21 +61,23 @@ class MainActivity : ComponentActivity() {
                 ),
                 contentPadding = PaddingValues(0.dp)
             ) {
-                items.forEach { pair ->
-                    val (ratio, text) = pair
-                    item(aspectRatio = ratio) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.primaryContainer),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = text,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                style = MaterialTheme.typography.titleLarge
-                            )
-                        }
+
+                items(
+                    items = items,
+                    key = { it.hashCode() },
+                    aspectRatio = { it.first }
+                ) { item ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.primaryContainer),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = item.second,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            style = MaterialTheme.typography.titleLarge
+                        )
                     }
                 }
             }
