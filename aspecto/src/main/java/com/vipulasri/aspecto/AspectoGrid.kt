@@ -13,11 +13,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -37,7 +36,7 @@ fun AspectoGrid(
     val scope = remember { AspectoLayoutScope().apply(content) }
     val density = LocalDensity.current
 
-    val layoutInfo = remember(scope.items, maxRowHeight, itemPadding) {
+    val layoutInfo = remember(maxRowHeight, itemPadding) {
         AspectoRowCalculator(
             maxRowHeight = with(density) { maxRowHeight.toPx().toInt() },
             horizontalPadding = with(density) {
@@ -49,18 +48,14 @@ fun AspectoGrid(
     BoxWithConstraints(
         modifier = modifier.fillMaxWidth()
     ) {
-        val rows by remember(layoutInfo, scope.items, constraints.maxWidth) {
-            derivedStateOf {
-                val availableWidth = constraints.maxWidth - with(density) {
-                    (contentPadding.calculateStartPadding(LayoutDirection.Ltr) +
-                            contentPadding.calculateEndPadding(LayoutDirection.Ltr)).toPx()
-                }.toInt()
-
-                layoutInfo.setMaxRowWidth(availableWidth)
-                layoutInfo.addItems(scope.items)
-                layoutInfo.computeLayout()
-                layoutInfo.getRows()
-            }
+        val rows = remember(scope.items, constraints.maxWidth) {
+            calculateRows(
+                layoutInfo = layoutInfo,
+                items = scope.items,
+                availableWidth = constraints.maxWidth,
+                contentPadding = contentPadding,
+                density = density
+            )
         }
 
         LazyColumn(
@@ -69,26 +64,60 @@ fun AspectoGrid(
         ) {
             items(
                 count = rows.size,
-                key = { index -> rows[index].items.firstOrNull()?.key ?: index }
+                key = { rows[it].key },
+                contentType = { rows[it].items.size }
             ) { rowIndex ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(with(density) { rows[rowIndex].items.first().height.toDp() }),
-                    horizontalArrangement = Arrangement.spacedBy(
-                        itemPadding.calculateStartPadding(LayoutDirection.Ltr)
-                    )
-                ) {
-                    rows[rowIndex].items.forEach { item ->
-                        Box(
-                            modifier = Modifier
-                                .width(with(density) { item.width.toDp() })
-                                .fillMaxHeight()
-                        ) {
-                            item.content()
-                        }
-                    }
-                }
+                AspectoRow(
+                    row = rows[rowIndex].items,
+                    density = density,
+                    itemPadding = itemPadding
+                )
+            }
+        }
+    }
+}
+
+private fun calculateRows(
+    layoutInfo: AspectoRowCalculator,
+    items: List<AspectoLayoutInfo>,
+    availableWidth: Int,
+    contentPadding: PaddingValues,
+    density: Density
+): List<AspectoRow> {
+    val width = availableWidth - with(density) {
+        (contentPadding.calculateStartPadding(LayoutDirection.Ltr) +
+                contentPadding.calculateEndPadding(LayoutDirection.Ltr)).toPx()
+    }.toInt()
+
+    return with(layoutInfo) {
+        setMaxRowWidth(width)
+        addItems(items)
+        computeLayout()
+        getRows()
+    }
+}
+
+@Composable
+private fun AspectoRow(
+    row: List<AspectoLayoutInfo>,
+    density: Density,
+    itemPadding: PaddingValues
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(with(density) { row.first().height.toDp() }),
+        horizontalArrangement = Arrangement.spacedBy(
+            itemPadding.calculateStartPadding(LayoutDirection.Ltr)
+        )
+    ) {
+        for (item in row) {
+            Box(
+                modifier = Modifier
+                    .width(with(density) { item.width.toDp() })
+                    .fillMaxHeight()
+            ) {
+                item.content()
             }
         }
     }
