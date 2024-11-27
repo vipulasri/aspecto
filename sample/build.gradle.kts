@@ -52,6 +52,8 @@ dependencies {
 
     debugImplementation(libs.bundles.compose.debug)
 
+    implementation(libs.coil)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

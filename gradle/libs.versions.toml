@@ -32,6 +32,8 @@ androidx-compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
+coil = "io.coil-kt:coil-compose:2.5.0"
+
 [bundles]
 compose = ["androidx-compose-foundation", "androidx-compose-ui", "androidx-compose-ui-graphics", "androidx-compose-toolingPreview"]
 compose-debug = ["androidx-compose-tooling", "androidx-compose-ui-test-manifest"]
