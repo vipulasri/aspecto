@@ -33,7 +33,8 @@ fun AspectoGrid(
     itemPadding: PaddingValues = PaddingValues(0.dp),
     content: AspectoLayoutScope.() -> Unit
 ) {
-    val scope = remember { AspectoLayoutScope().apply(content) }
+    val scope = remember(content) { AspectoLayoutScope().apply(content) }
+
     val density = LocalDensity.current
 
     val layoutInfo = remember(maxRowHeight, itemPadding) {
