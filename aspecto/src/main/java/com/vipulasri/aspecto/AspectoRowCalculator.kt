@@ -18,13 +18,48 @@ internal class AspectoRowCalculator(
     private val minRowHeight = (maxRowHeight * 0.5f).toInt()
     private var availableWidth = 0
     private val rows = mutableListOf<AspectoRow>()
+    private var lastProcessedItems = listOf<AspectoLayoutInfo>()
 
     fun setMaxRowWidth(maxWidth: Int) {
         availableWidth = maxWidth
     }
 
     fun addItems(items: List<AspectoLayoutInfo>) {
-        rows.clear()
+        if (items == lastProcessedItems) return
+
+        val firstDiffIndex = findFirstDifferenceIndex(items, lastProcessedItems)
+
+        if (rows.isNotEmpty() && firstDiffIndex > 0) {
+            var itemCount = 0
+            val rowsToKeep = rows.takeWhile { row ->
+                itemCount += row.items.size
+                itemCount <= firstDiffIndex
+            }
+
+            rows.clear()
+            rows.addAll(rowsToKeep)
+
+            processItems(items.subList(itemCount, items.size))
+        } else {
+            rows.clear()
+            processItems(items)
+        }
+
+        lastProcessedItems = items
+    }
+
+    private fun findFirstDifferenceIndex(
+        newItems: List<AspectoLayoutInfo>,
+        oldItems: List<AspectoLayoutInfo>
+    ): Int {
+        val minSize = minOf(newItems.size, oldItems.size)
+        for (i in 0 until minSize) {
+            if (newItems[i] != oldItems[i]) return i
+        }
+        return minSize
+    }
+
+    private fun processItems(items: List<AspectoLayoutInfo>) {
         var currentIndex = 0
 
         while (currentIndex < items.size) {
