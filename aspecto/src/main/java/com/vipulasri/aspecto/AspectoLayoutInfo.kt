@@ -1,22 +1,23 @@
 package com.vipulasri.aspecto
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 
 /**
  * Created by Vipul Asri on 23/11/24.
  */
 
+@Stable
 data class AspectoLayoutInfo(
     val aspectRatio: Float,
     val key: Any?,
     val contentType: Any?,
     val content: @Composable () -> Unit,
-    var width: Int = 0,
-    var height: Int = 0
+    val width: Int = 0,
+    val height: Int = 0
 )
 
 class AspectoLayoutScope {
-
     private val _items = mutableListOf<AspectoLayoutInfo>()
     val items: List<AspectoLayoutInfo> = _items
 

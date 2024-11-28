@@ -97,20 +97,24 @@ internal class AspectoRowCalculator(
             val rowHeight = calculateRowHeight(effectiveWidth, aspectRatioSum)
                 .coerceIn(minRowHeight.toFloat(), maxRowHeight.toFloat())
 
-            row.items.forEach { item ->
-                item.height = rowHeight.toInt()
-            }
-
             var remainingWidth = effectiveWidth
-            row.items.forEachIndexed { index, item ->
-                item.width = if (index == row.items.lastIndex) {
+            val updatedItems = row.items.mapIndexed { index, item ->
+                val itemWidth = if (index == row.items.lastIndex) {
                     remainingWidth
                 } else {
                     (effectiveWidth * (item.aspectRatio / aspectRatioSum)).toInt().also {
                         remainingWidth -= it
                     }
                 }
+                
+                item.copy(
+                    width = itemWidth,
+                    height = rowHeight.toInt()
+                )
             }
+            
+            // Update row with new items
+            rows[rows.indexOf(row)] = AspectoRow(updatedItems)
         }
     }
 
