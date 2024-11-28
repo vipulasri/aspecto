@@ -45,42 +45,40 @@ class MainActivity : ComponentActivity() {
             var items by remember { mutableStateOf(getItems()) }
 
             LaunchedEffect(Unit) {
-                delay(6000)
+                delay(2000)
                 items += getItems()
             }
 
             AspectoTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
-                    key(items) {
-                        AspectoGrid(
-                            modifier = Modifier.padding(padding),
-                            maxRowHeight = 200.dp,
-                            itemPadding = PaddingValues(
-                                horizontal = 4.dp,
-                                vertical = 4.dp
-                            ),
-                            contentPadding = PaddingValues(0.dp)
-                        ) {
-                            items(
-                                items = items,
-                                key = { it.id },
-                                aspectRatio = { it.aspectRatio }
-                            ) { item ->
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                                ) {
-                                    AsyncImage(
-                                        model = ImageRequest.Builder(LocalContext.current)
-                                            .data(item.imageUrl)
-                                            .crossfade(true)
-                                            .build(),
-                                        contentDescription = item.title,
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentScale = ContentScale.Crop
-                                    )
-                                }
+                    AspectoGrid(
+                        modifier = Modifier.padding(padding),
+                        maxRowHeight = 250.dp,
+                        itemPadding = PaddingValues(
+                            horizontal = 4.dp,
+                            vertical = 4.dp
+                        ),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        items(
+                            items = items,
+                            key = { it.id },
+                            aspectRatio = { it.aspectRatio }
+                        ) { item ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                            ) {
+                                AsyncImage(
+                                    model = ImageRequest.Builder(LocalContext.current)
+                                        .data(item.imageUrl)
+                                        .crossfade(true)
+                                        .build(),
+                                    contentDescription = item.title,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
                             }
                         }
                     }
