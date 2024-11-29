@@ -27,6 +27,7 @@ class AspectoLayoutScope {
         contentType: Any? = null,
         content: @Composable () -> Unit
     ) {
+        validate(aspectRatio)
         _items.add(
             AspectoLayoutInfo(
                 aspectRatio = aspectRatio,
@@ -45,6 +46,7 @@ class AspectoLayoutScope {
         itemContent: @Composable (T) -> Unit
     ) {
         items.forEach { item ->
+            validate(aspectRatio(item))
             _items.add(
                 AspectoLayoutInfo(
                     key = key?.invoke(item),
@@ -53,6 +55,15 @@ class AspectoLayoutScope {
                     content = { itemContent(item) }
                 )
             )
+        }
+    }
+
+    private fun validate(aspectRatio: Float, key: Any? = null) {
+        require(aspectRatio > 0f) {
+            buildString {
+                append("Aspect ratio must be positive and greater than zero (got $aspectRatio)")
+                if (key != null) append(" for key: $key")
+            }
         }
     }
 }
