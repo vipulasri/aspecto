@@ -97,23 +97,15 @@ internal class AspectoRowCalculator(
             val rowHeight = calculateRowHeight(effectiveWidth, aspectRatioSum)
                 .coerceIn(minRowHeight.toFloat(), maxRowHeight.toFloat())
 
-            var remainingWidth = effectiveWidth
             val updatedItems = row.items.mapIndexed { index, item ->
-                val itemWidth = if (index == row.items.lastIndex) {
-                    remainingWidth
-                } else {
-                    (effectiveWidth * (item.aspectRatio / aspectRatioSum)).toInt().also {
-                        remainingWidth -= it
-                    }
-                }
-                
+                val itemWidth = (rowHeight * item.aspectRatio).toInt()
+
                 item.copy(
-                    width = itemWidth,
+                    width = if (itemWidth > effectiveWidth) effectiveWidth else itemWidth,
                     height = rowHeight.toInt()
                 )
             }
-            
-            // Update row with new items
+
             rows[rows.indexOf(row)] = AspectoRow(updatedItems)
         }
     }
@@ -144,6 +136,16 @@ internal class AspectoRowCalculator(
 
     private fun calculateRowHeight(width: Int, aspectRatioSum: Float): Float {
         if (aspectRatioSum == 0f) return minRowHeight.toFloat()
-        return (width / aspectRatioSum).coerceIn(minRowHeight.toFloat(), maxRowHeight.toFloat())
+
+        // Calculate the base row height
+        val rowHeight = width / aspectRatioSum
+
+        // If there's only one item and it would result in a very tall row,
+        // limit it to 75% of maxRowHeight
+        if (rowHeight > maxRowHeight) {
+            return (maxRowHeight * 0.75f)
+        }
+
+        return rowHeight.coerceIn(minRowHeight.toFloat(), maxRowHeight.toFloat())
     }
 }
