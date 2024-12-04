@@ -67,10 +67,13 @@ internal class AspectoRowCalculator(
                 val candidateRow = items.subList(currentIndex, currentIndex + numItems)
                 val score = calculateRowScore(candidateRow)
 
-                if (score < bestScore) {
-                    bestScore = score
-                    bestRow = candidateRow
+                if (score > bestScore) {
+                    // If score is getting worse, no point trying larger rows
+                    break
                 }
+
+                bestScore = score
+                bestRow = candidateRow
             }
 
             val rowItems = bestRow ?: run {
