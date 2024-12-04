@@ -50,10 +50,19 @@ internal class AspectoRowCalculator(
     private fun findFirstDifferenceIndex(
         newItems: List<AspectoLayoutInfo>,
         oldItems: List<AspectoLayoutInfo>
-    ): Int = newItems.zip(oldItems)
-        .withIndex()
-        .firstOrNull { (_, pair) -> pair.first != pair.second }
-        ?.index ?: minOf(newItems.size, oldItems.size)
+    ): Int  {
+        val minLength = minOf(oldItems.size, newItems.size)
+
+        // Compare elements up to the length of the shorter list
+        for (i in 0 until minLength) {
+            if (oldItems[i] != newItems[i]) {
+                return i
+            }
+        }
+
+        // If no difference was found, check for length mismatch
+        return if (oldItems.size != newItems.size) minLength else -1
+    }
 
     private fun calculateEffectiveWidth(itemCount: Int): Int {
         return availableWidth - (horizontalPadding * (itemCount - 1))
