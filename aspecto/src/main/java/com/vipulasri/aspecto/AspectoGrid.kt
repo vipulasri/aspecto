@@ -101,7 +101,6 @@ private fun calculateRows(
     return with(layoutInfo) {
         setMaxRowWidth(width)
         addItems(items)
-        computeLayout()
         getRows()
     }
 }
