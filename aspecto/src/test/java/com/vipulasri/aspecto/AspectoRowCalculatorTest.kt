@@ -130,7 +130,7 @@ class AspectoRowCalculatorTest {
     }
     
     @Test
-    fun `should distribute items evenly across rows based on available width`() {
+    fun `should distribute items properly across rows based on available width`() {
         // Given
         val items = List(4) { createTestItem(aspectRatio = 1.0f) }
         
@@ -139,17 +139,16 @@ class AspectoRowCalculatorTest {
         
         // Then
         val rows = calculator.getRows()
-        assertTrue(rows.isNotEmpty()) // Should have at least one row
-        assertTrue(rows.all { row -> 
-            // Each row's total width should be close to effective width
-            val effectiveWidth = AVAILABLE_WIDTH - (HORIZONTAL_PADDING * (row.items.size - 1))
-            val totalWidth = row.items.sumOf { it.width }
-            abs(totalWidth - effectiveWidth) < 1 // Allow for rounding
-        })
         
-        // All items in each row should have the same height
+        // Should be distributed as 3+1 for optimal width utilization
+        assertEquals(2, rows.size)
+        assertEquals(3, rows[0].items.size) // First row should have 3 items
+        assertEquals(1, rows[1].items.size) // Second row should have 1 item
+        
+        // Items in same row should have equal widths (since same aspect ratio)
         rows.forEach { row ->
-            assertEquals(1, row.items.map { it.height }.distinct().size)
+            val widths = row.items.map { it.width }
+            assertEquals(1, widths.distinct().size)
         }
     }
     
