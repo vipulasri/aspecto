@@ -1,3 +1,19 @@
+/*
+ * Copyright 2024 Vipul Asri
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.vipulasri.aspecto
 
 import androidx.compose.foundation.layout.Arrangement
@@ -27,9 +43,36 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 
 /**
- * Created by Vipul Asri on 23/11/24.
+ * A composable that arranges items in a grid layout with varying row heights based on item aspect ratios.
+ * Each row is optimized to best utilize the available width while maintaining the aspect ratios of its items.
+ *
+ * @param modifier The modifier to be applied to the grid
+ * @param state The state object to be used to control or observe the list's state
+ * @param contentPadding The padding around the content
+ * @param maxRowHeight Maximum height allowed for any row
+ * @param itemPadding Padding between items in a row
+ * @param content The grid content using [AspectoGridScope]
+ *
+ * Example usage:
+ * ```
+ * AspectoGrid(
+ *     modifier = Modifier.fillMaxWidth(),
+ *     contentPadding = PaddingValues(8.dp)
+ * ) {
+ *     items(
+ *         items = imageList,
+ *         key = { it.id },
+ *         aspectRatio = { it.width / it.height.toFloat() }
+ *     ) { image ->
+ *         AsyncImage(
+ *             model = image.url,
+ *             contentDescription = null,
+ *             modifier = Modifier.fillMaxSize()
+ *         )
+ *     }
+ * }
+ * ```
  */
-
 @Composable
 fun AspectoGrid(
     modifier: Modifier = Modifier,

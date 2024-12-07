@@ -1,16 +1,41 @@
+/*
+ * Copyright 2024 Vipul Asri
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.vipulasri.aspecto
 
 import kotlin.math.abs
 
 /**
- * Created by Vipul Asri on 23/11/24.
+ * Calculator for optimizing row layouts in AspectGrid.
+ * 
+ * This class handles:
+ * - Row height and width calculations
+ * - Item distribution across rows
+ * - Height constraints enforcement
+ * - Incremental layout updates
+ *
+ * @param maxRowHeight Maximum allowed height for any row
+ * @param horizontalPadding Padding between items in a row
  */
-
 internal class AspectoRowCalculator(
     private val maxRowHeight: Int = DEFAULT_MAX_ROW_HEIGHT,
     private val horizontalPadding: Int = 0
 ) {
     companion object {
+        /** Default maximum row height in pixels */
         const val DEFAULT_MAX_ROW_HEIGHT = 600
     }
 
