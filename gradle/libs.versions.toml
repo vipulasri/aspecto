@@ -1,4 +1,7 @@
 [versions]
+android-compileSdk = "34"
+android-minSdk = "24"
+android-targetSdk = "34"
 agp = "8.7.2"
 kotlin = "2.0.21"
 coreKtx = "1.15.0"
@@ -10,6 +13,7 @@ activityCompose = "1.9.3"
 appcompat = "1.7.0"
 material = "1.12.0"
 uiTestJunit4Android = "1.7.5"
+compose-multiplatform = "1.7.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -45,6 +49,8 @@ compose-debug = ["androidx-compose-tooling", "androidx-compose-ui-test-manifest"
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 

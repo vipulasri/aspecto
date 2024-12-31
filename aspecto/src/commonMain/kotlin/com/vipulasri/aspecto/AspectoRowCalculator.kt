@@ -179,8 +179,8 @@ internal class AspectoRowCalculator(
     }
 
     private fun calculateAspectRatioSum(
-        items: List<AspectoLayoutInfo>, 
-        startIndex: Int, 
+        items: List<AspectoLayoutInfo>,
+        startIndex: Int,
         endIndex: Int
     ): Float {
         var sum = 0f
