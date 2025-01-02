@@ -14,6 +14,8 @@ appcompat = "1.7.0"
 material = "1.12.0"
 uiTestJunit4Android = "1.7.5"
 compose-multiplatform = "1.7.3"
+coil = "3.0.4"
+ktor = "3.0.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -38,13 +40,20 @@ androidx-compose-ui-test-junit4-android = { module = "androidx.compose.ui:ui-tes
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
-coil = "io.coil-kt:coil-compose:2.5.0"
+coil-core = { module = "io.coil-kt.coil3:coil", version.ref = "coil" }
+coil-compose-core = { module = "io.coil-kt.coil3:coil-compose-core", version.ref = "coil" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil3-network = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
+
+ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
+ktor-client-ios = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 
 robolectric = "org.robolectric:robolectric:4.11.1"
 
 [bundles]
 compose = ["androidx-compose-foundation", "androidx-compose-ui", "androidx-compose-ui-graphics", "androidx-compose-toolingPreview"]
 compose-debug = ["androidx-compose-tooling", "androidx-compose-ui-test-manifest"]
+coil = ["coil-core", "coil-compose-core", "coil-compose", "coil3-network"]
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

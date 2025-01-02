@@ -35,10 +35,12 @@ kotlin {
         }
 
         commonMain.dependencies {
+            implementation(project(":aspecto"))
+
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
-            implementation(project(":aspecto"))
+            implementation(libs.bundles.coil)
         }
 
         commonTest.dependencies {
@@ -48,10 +50,11 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.compose.tooling)
+            implementation(libs.ktor.client.android)
         }
 
         iosMain.dependencies {
-
+            implementation(libs.ktor.client.ios)
         }
     }
 }

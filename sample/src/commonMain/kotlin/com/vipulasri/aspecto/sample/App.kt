@@ -14,7 +14,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import coil3.ImageLoader
+import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
+import coil3.compose.setSingletonImageLoaderFactory
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import coil3.util.DebugLogger
 import com.vipulasri.aspecto.AspectoGrid
 import com.vipulasri.aspecto.sample.ui.theme.AspectoTheme
 import kotlinx.coroutines.delay
@@ -25,6 +33,14 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun App() {
+
+    setSingletonImageLoaderFactory { context ->
+        ImageLoader.Builder(context)
+            .crossfade(true)
+            .logger(DebugLogger())
+            .build()
+    }
+
     AspectoTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
 
@@ -54,15 +70,14 @@ fun App() {
                             .fillMaxSize()
                             .background(MaterialTheme.colorScheme.surfaceVariant)
                     ) {
-//                        AsyncImage(
-//                            model = ImageRequest.Builder(LocalContext.current)
-//                                .data(item.imageUrl)
-//                                .crossfade(true)
-//                                .build(),
-//                            contentDescription = item.title,
-//                            modifier = Modifier.fillMaxSize(),
-//                            contentScale = ContentScale.Crop
-//                        )
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalPlatformContext.current)
+                                .data(item.imageUrl)
+                                .build(),
+                            contentDescription = item.title,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
                     }
                 }
             }
