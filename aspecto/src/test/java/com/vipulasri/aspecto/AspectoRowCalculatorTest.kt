@@ -2,11 +2,9 @@ package com.vipulasri.aspecto
 
 import androidx.compose.runtime.Composable
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import kotlin.math.abs
 
 class AspectoRowCalculatorTest {
     
