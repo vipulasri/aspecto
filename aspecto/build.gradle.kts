@@ -47,6 +47,16 @@ kotlin {
 
         }
 
+        androidUnitTest.dependencies {
+            dependencies {
+                implementation(compose.material3)
+                implementation(libs.junit)
+                implementation(libs.androidx.junit)
+                implementation(libs.robolectric)
+                implementation(libs.androidx.compose.ui.test.junit4.android)
+            }
+        }
+
         iosMain.dependencies {
 
         }
@@ -87,23 +97,6 @@ android {
     buildFeatures {
         compose = true
     }
-    testOptions {
-        unitTests {
-            isIncludeAndroidResources = true
-        }
-    }
-}
-
-dependencies {
-    implementation(platform(libs.androidx.compose.bom))
-
-    testImplementation(libs.junit)
-    testImplementation(libs.androidx.junit)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.androidx.compose.material3)
-    testImplementation(libs.androidx.compose.ui.test.junit4.android)
-
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    testOptions.unitTests.isIncludeAndroidResources = true
+    testOptions.unitTests.isReturnDefaultValues = true
 }
