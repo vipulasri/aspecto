@@ -56,8 +56,8 @@ AspectoGrid(
     }
 }
 ```
-[Android](https://github.com/vipulasri/aspecto/tree/main/sample-android) & 
-[iOS](https://github.com/vipulasri/aspecto/tree/main/sample-ios) samples.
+[Android](https://github.com/vipulasri/aspecto/tree/main/sample) & 
+[iOS](https://github.com/vipulasri/aspecto/tree/main/iosApp) samples.
 Both samples use the same [shared code](https://github.com/vipulasri/aspecto/tree/main/sample/src/commonMain/kotlin/com/vipulasri/aspecto/sample/App.kt) to demonstrate the Compose Multiplatform capabilities.
 
 ## Inspired by
