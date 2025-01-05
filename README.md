@@ -1,8 +1,9 @@
-# Aspecto
 
-A grid layout that perfectly preserves item's aspect ratio for Jetpack Compose.
+![Aspecto Graphics](https://github.com/user-attachments/assets/27b8e750-cc42-4e99-b8ff-ea549f118aa5)<br><br>
 
-> Just as the 🪄Patronus charm protects its caster, Aspecto protects image layouts from distortion!
+[Aspecto](https://github.com/vipulasri/aspecto) is a grid layout that perfectly preserves each item's aspect ratio for the Jetpack Compose / Compose Multiplatform. 
+
+✨ Just as the 🪄 Patronus charm protects its caster, Aspecto protects image layouts from distortion!
 
 ## Features
 
