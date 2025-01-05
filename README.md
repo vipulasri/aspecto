@@ -4,11 +4,7 @@
 
 ✨ Just as the 🪄 Patronus charm protects its caster, Aspecto protects image layouts from distortion!<br>
 
-## Sample
-[Android](https://github.com/vipulasri/aspecto/tree/main/sample-android) & 
-[iOS](https://github.com/vipulasri/aspecto/tree/main/sample-ios) samples.
-Both samples use the same [shared code](https://github.com/vipulasri/aspecto/tree/main/sample/src/commonMain/kotlin/com/vipulasri/aspecto/sample/App.kt) to demonstrate the Compose Multiplatform capabilities.
-
+## Showcase
 https://github.com/user-attachments/assets/58cd864b-0a82-431b-ac6e-de755f885b98
 
 ## Features
@@ -57,7 +53,9 @@ AspectoGrid(
     }
 }
 ```
-See the [sample](https://github.com/vipulasri/aspecto/blob/main/sample/src/commonMain/kotlin/com/vipulasri/aspecto/sample/App.kt) application for more usage.
+[Android](https://github.com/vipulasri/aspecto/tree/main/sample-android) & 
+[iOS](https://github.com/vipulasri/aspecto/tree/main/sample-ios) samples.
+Both samples use the same [shared code](https://github.com/vipulasri/aspecto/tree/main/sample/src/commonMain/kotlin/com/vipulasri/aspecto/sample/App.kt) to demonstrate the Compose Multiplatform capabilities.
 
 ## Inspired by
 
