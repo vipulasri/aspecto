@@ -28,16 +28,12 @@ Add the dependency to your project:
 
 ### Compose Multiplatform
 ```kotlin
-dependencies {
-    implementation("com.vipulasri.aspecto:aspecto:<latest-version>")
-}
+implementation("com.vipulasri.aspecto:aspecto:<latest-version>")
 ```
 
 ### Android Only
 ```groovy
-dependencies {
-    implementation("com.vipulasri.aspecto:aspecto-android:<latest-version>")
-}
+implementation("com.vipulasri.aspecto:aspecto-android:<latest-version>")
 ```
 
 ## Usage
