@@ -8,14 +8,8 @@
 ✨ Just as the 🪄 Patronus charm protects its caster, Aspecto protects image layouts from distortion!<br>
 
 ## Showcase
+![Comparison-2](https://github.com/user-attachments/assets/dc7a23f5-ba2c-469a-a5d4-e0ea7dd03b7d)
 
-### Comparison
-| Grid | Staggered Grid / Masonry Layout | Aspecto | 
-| -- | -- | -- |
-| <img src="https://github.com/user-attachments/assets/a7a9e748-3065-4f42-b556-214fff39dc7d" alt="Grid Layout vs Aspecto" width="270" height="585" />|<div align="center"><img src="https://github.com/user-attachments/assets/ddcc10f4-fa79-47e9-a97d-5745a5eb551a" alt="Staggered Grid/Masonry Layout vs Aspecto" width="270" height="585" /></div>| <div align="center"><img src="https://github.com/user-attachments/assets/7bf0ac22-2bc2-4bb8-b6ac-eff092d94ce2" alt="Aspecto" width="270" height="585" /></div>|
-| Images are Cropped ❌ | Preserves Aspect Ratio but disrupts layout consistency ❌ | Preserves Aspect Ratio with a smooth and consistent layout ✅ |
-
-### Android and iOS compatible
 https://github.com/user-attachments/assets/58cd864b-0a82-431b-ac6e-de755f885b98
 
 ## Features
