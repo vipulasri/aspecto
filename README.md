@@ -10,9 +10,9 @@
 ## Showcase
 
 ### Comparison
-| Grid | Staggered Grid or Masonry Layout | Aspecto | 
+| Grid | Staggered Grid / Masonry Layout | Aspecto | 
 | -- | -- | -- |
-| <img src="https://github.com/user-attachments/assets/5be568a5-097f-4183-9812-61b9bc4bc109" alt="Grid Layout vs Aspecto" width="270" height="585" />|<div align="center"><img src="https://github.com/user-attachments/assets/b38cd49a-a4d2-456e-baf8-213c18057bc9" alt="Staggered Grid/Masonry Layout vs Aspecto" width="270" height="585" /></div>| <div align="center"><img src="https://github.com/user-attachments/assets/11ac92ca-dea2-4682-8654-bd4d2fcf7c45" alt="Aspecto" width="270" height="585" /></div>|
+| <img src="https://github.com/user-attachments/assets/a7a9e748-3065-4f42-b556-214fff39dc7d" alt="Grid Layout vs Aspecto" width="270" height="585" />|<div align="center"><img src="https://github.com/user-attachments/assets/ddcc10f4-fa79-47e9-a97d-5745a5eb551a" alt="Staggered Grid/Masonry Layout vs Aspecto" width="270" height="585" /></div>| <div align="center"><img src="https://github.com/user-attachments/assets/7bf0ac22-2bc2-4bb8-b6ac-eff092d94ce2" alt="Aspecto" width="270" height="585" /></div>|
 | Images are Cropped ❌ | Preserves Aspect Ratio but disrupts layout consistency ❌ | Preserves Aspect Ratio with a smooth and consistent layout ✅ |
 
 ### Android and iOS compatible
