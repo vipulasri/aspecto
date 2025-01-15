@@ -2,6 +2,7 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.vipulasri.aspecto/aspecto)](https://search.maven.org/search?q=g:com.vipulasri.aspecto)
 [![Build status](https://github.com/vipulasri/aspecto/actions/workflows/publish.yml/badge.svg)](https://github.com/vipulasri/aspecto/actions)
+[![AndroidWeekly](https://androidweekly.net/issues/issue-657/badge)](https://androidweekly.net/issues/issue-657)
 
 [Aspecto](https://github.com/vipulasri/aspecto) is a grid layout that perfectly preserves each item's aspect ratio for the [Jetpack Compose](https://developer.android.com/compose) / [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/).
 
