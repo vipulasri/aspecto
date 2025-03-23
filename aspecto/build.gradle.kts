@@ -49,13 +49,11 @@ kotlin {
         }
 
         androidUnitTest.dependencies {
-            dependencies {
-                implementation(compose.material3)
-                implementation(libs.junit)
-                implementation(libs.androidx.junit)
-                implementation(libs.robolectric)
-                implementation(libs.androidx.compose.ui.test.junit4.android)
-            }
+            implementation(compose.material3)
+            implementation(libs.junit)
+            implementation(libs.androidx.junit)
+            implementation(libs.robolectric)
+            implementation(libs.androidx.compose.ui.test.junit4.android)
         }
 
         iosMain.dependencies {
