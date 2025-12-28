@@ -37,6 +37,21 @@ internal class AspectoRowCalculator(
     companion object {
         /** Default maximum row height in pixels */
         const val DEFAULT_MAX_ROW_HEIGHT = 600
+        
+        /** 
+         * Average number of items per row, used for capacity pre-allocation.
+         * Based on typical photo gallery layouts where 2-3 items per row provides good balance
+         * between width utilization and visual appeal.
+         */
+        private const val AVERAGE_ITEMS_PER_ROW = 2.5f
+        
+        /**
+         * Threshold multiplier for early termination in row configuration search.
+         * If the score deteriorates by more than this factor, we stop searching as
+         * further configurations are unlikely to be better. Value of 1.5 provides
+         * good balance between search completeness and performance.
+         */
+        private const val EARLY_TERMINATION_THRESHOLD = 1.5f
     }
 
     private val minRowHeight = (maxRowHeight * 0.5f).toInt()
@@ -49,7 +64,9 @@ internal class AspectoRowCalculator(
     }
 
     fun addItems(items: List<AspectoLayoutInfo>) {
-        if (items === lastProcessedItems) return // Use referential equality first
+        // Optimization: Use referential equality (===) as a fast path before structural comparison.
+        // If the same list instance is provided, no recalculation is needed.
+        if (items === lastProcessedItems) return
         if (items.isEmpty()) {
             rows.clear()
             lastProcessedItems = items
@@ -110,9 +127,8 @@ internal class AspectoRowCalculator(
     private fun processItems(items: List<AspectoLayoutInfo>) {
         if (items.isEmpty()) return
         
-        // Optimization: Pre-allocate capacity for rows list
-        // Estimate: average 2-3 items per row
-        val estimatedRowCount = (items.size / 2.5).toInt().coerceAtLeast(1)
+        // Optimization: Pre-allocate capacity for rows list based on estimated row count
+        val estimatedRowCount = (items.size / AVERAGE_ITEMS_PER_ROW).toInt().coerceAtLeast(1)
         rows.ensureCapacity(rows.size + estimatedRowCount)
         
         var currentIndex = 0
@@ -157,9 +173,6 @@ internal class AspectoRowCalculator(
         
         // Optimization: Track aspect ratio sum incrementally
         var aspectRatioSum = 0f
-        
-        // Optimization: Early termination threshold - if score increases significantly, stop
-        val earlyTerminationThreshold = 1.5f
 
         for (numItems in 1..items.size - startIndex) {
             val endIndex = startIndex + numItems
@@ -173,8 +186,8 @@ internal class AspectoRowCalculator(
             
             val score = calculateRowScore(items, startIndex, endIndex, effectiveWidth, rowHeight, aspectRatioSum)
 
-            // Early termination: if score is getting worse significantly, stop
-            if (score > bestScore * earlyTerminationThreshold) break
+            // Early termination: if score deteriorates significantly beyond threshold, stop searching
+            if (score > bestScore * EARLY_TERMINATION_THRESHOLD) break
 
             bestScore = score
             bestStartIndex = startIndex

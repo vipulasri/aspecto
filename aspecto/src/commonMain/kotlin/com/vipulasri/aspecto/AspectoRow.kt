@@ -25,10 +25,18 @@ package com.vipulasri.aspecto
 internal data class AspectoRow(
     val items: List<AspectoLayoutInfo> = emptyList()
 ) {
+    companion object {
+        /**
+         * Estimated average characters per item key for buildString capacity.
+         * Assumes typical key format like "item123" or similar short identifiers.
+         */
+        private const val ESTIMATED_KEY_LENGTH_PER_ITEM = 10
+    }
+    
     /** Unique identifier for the row, derived from item keys */
     val key: String by lazy {
         // Optimization: Use buildString for efficient string concatenation
-        buildString(capacity = items.size * 10) {
+        buildString(capacity = items.size * ESTIMATED_KEY_LENGTH_PER_ITEM) {
             items.forEachIndexed { index, item ->
                 if (index > 0) append('-')
                 append(item.key?.toString() ?: item.hashCode())
