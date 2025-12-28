@@ -32,6 +32,8 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -96,15 +98,15 @@ fun AspectoGrid(
     BoxWithConstraints(
         modifier = modifier.fillMaxWidth()
     ) {
-        // Optimization: Use remember instead of mutableStateOf since rows don't need state tracking
-        // The remember key dependencies will trigger recalculation when needed
-        val rows = remember(scope.items, constraints.maxWidth, contentPadding) {
-            calculateRows(
-                layoutInfo = layoutInfo,
-                items = scope.items,
-                availableWidth = constraints.maxWidth,
-                contentPadding = contentPadding,
-                density = density
+        val rows by remember(scope.items, constraints.maxWidth) {
+            mutableStateOf(
+                calculateRows(
+                    layoutInfo = layoutInfo,
+                    items = scope.items,
+                    availableWidth = constraints.maxWidth,
+                    contentPadding = contentPadding,
+                    density = density
+                )
             )
         }
 

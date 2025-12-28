@@ -37,21 +37,6 @@ internal class AspectoRowCalculator(
     companion object {
         /** Default maximum row height in pixels */
         const val DEFAULT_MAX_ROW_HEIGHT = 600
-        
-        /** 
-         * Average number of items per row, used for capacity pre-allocation.
-         * Based on typical photo gallery layouts where 2-3 items per row provides good balance
-         * between width utilization and visual appeal.
-         */
-        private const val AVERAGE_ITEMS_PER_ROW = 2.5f
-        
-        /**
-         * Threshold multiplier for early termination in row configuration search.
-         * If the score deteriorates by more than this factor, we stop searching as
-         * further configurations are unlikely to be better. Value of 1.5 provides
-         * good balance between search completeness and performance.
-         */
-        private const val EARLY_TERMINATION_THRESHOLD = 1.5f
     }
 
     private val minRowHeight = (maxRowHeight * 0.5f).toInt()
@@ -64,37 +49,21 @@ internal class AspectoRowCalculator(
     }
 
     fun addItems(items: List<AspectoLayoutInfo>) {
-        // Optimization: Use referential equality (===) as a fast path before structural comparison.
-        // If the same list instance is provided, no recalculation is needed.
-        if (items === lastProcessedItems) return
-        if (items.isEmpty()) {
-            rows.clear()
-            lastProcessedItems = items
-            return
-        }
+        if (items == lastProcessedItems) return
 
         val firstDiffIndex = findFirstDifferenceIndex(items, lastProcessedItems)
 
         if (rows.isNotEmpty() && firstDiffIndex > 0) {
             var itemCount = 0
-            // Optimization: Calculate rows to keep more efficiently
-            var keepUpToRow = 0
-            for (i in rows.indices) {
-                val nextItemCount = itemCount + rows[i].items.size
-                if (nextItemCount > firstDiffIndex) break
-                itemCount = nextItemCount
-                keepUpToRow = i + 1
+            val rowsToKeep = rows.takeWhile { row ->
+                itemCount += row.items.size
+                itemCount <= firstDiffIndex
             }
 
-            // Optimization: Use subList view and avoid intermediate list
-            if (keepUpToRow < rows.size) {
-                val rowsToRemove = rows.size - keepUpToRow
-                repeat(rowsToRemove) { rows.removeAt(rows.lastIndex) }
-            }
+            rows.clear()
+            rows.addAll(rowsToKeep)
 
-            if (itemCount < items.size) {
-                processItems(items.subList(itemCount, items.size))
-            }
+            processItems(items.subList(itemCount, items.size))
         } else {
             rows.clear()
             processItems(items)
@@ -125,12 +94,6 @@ internal class AspectoRowCalculator(
     }
 
     private fun processItems(items: List<AspectoLayoutInfo>) {
-        if (items.isEmpty()) return
-        
-        // Optimization: Pre-allocate capacity for rows list based on estimated row count
-        val estimatedRowCount = (items.size / AVERAGE_ITEMS_PER_ROW).toInt().coerceAtLeast(1)
-        rows.ensureCapacity(rows.size + estimatedRowCount)
-        
         var currentIndex = 0
 
         while (currentIndex < items.size) {
@@ -170,24 +133,17 @@ internal class AspectoRowCalculator(
         var bestScore = Float.POSITIVE_INFINITY
         var bestEffectiveWidth = 0
         var bestRowHeight = 0f
-        
-        // Optimization: Track aspect ratio sum incrementally
-        var aspectRatioSum = 0f
 
         for (numItems in 1..items.size - startIndex) {
             val endIndex = startIndex + numItems
             val effectiveWidth = calculateEffectiveWidth(numItems)
-            
-            // Incrementally calculate aspect ratio sum
-            aspectRatioSum += items[endIndex - 1].aspectRatio
-            
+            val aspectRatioSum = calculateAspectRatioSum(items, startIndex, endIndex)
             val rowHeight = calculateRowHeight(effectiveWidth, aspectRatioSum)
                 .coerceIn(minRowHeight.toFloat(), maxRowHeight.toFloat())
             
-            val score = calculateRowScore(items, startIndex, endIndex, effectiveWidth, rowHeight, aspectRatioSum)
+            val score = calculateRowScore(items, startIndex, endIndex, effectiveWidth, rowHeight)
 
-            // Early termination: if score deteriorates significantly beyond threshold, stop searching
-            if (score > bestScore * EARLY_TERMINATION_THRESHOLD) break
+            if (score > bestScore) break
 
             bestScore = score
             bestStartIndex = startIndex
@@ -211,23 +167,15 @@ internal class AspectoRowCalculator(
         effectiveWidth: Int,
         rowHeight: Float
     ): List<AspectoLayoutInfo> {
-        // Optimization: Pre-allocate ArrayList with exact capacity
-        val count = endIndex - startIndex
-        val result = ArrayList<AspectoLayoutInfo>(count)
-        
-        for (i in startIndex until endIndex) {
-            val item = items[i]
+        return List(endIndex - startIndex) { index ->
+            val item = items[startIndex + index]
             val itemWidth = (rowHeight * item.aspectRatio).toInt()
                 .coerceAtMost(effectiveWidth)
-            result.add(
-                item.copy(
-                    width = itemWidth,
-                    height = rowHeight.toInt()
-                )
+            item.copy(
+                width = itemWidth,
+                height = rowHeight.toInt()
             )
         }
-        
-        return result
     }
 
     private fun calculateAspectRatioSum(
@@ -247,11 +195,8 @@ internal class AspectoRowCalculator(
         startIndex: Int,
         endIndex: Int,
         effectiveWidth: Int,
-        rowHeight: Float,
-        aspectRatioSum: Float
+        rowHeight: Float
     ): Float {
-        // Optimization: Calculate total width more efficiently
-        // Total width is approximately rowHeight * aspectRatioSum, but we need to account for integer rounding
         var totalWidth = 0
         for (i in startIndex until endIndex) {
             val itemWidth = (rowHeight * items[i].aspectRatio).toInt()
