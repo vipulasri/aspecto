@@ -26,6 +26,13 @@ internal data class AspectoRow(
     val items: List<AspectoLayoutInfo> = emptyList()
 ) {
     /** Unique identifier for the row, derived from item keys */
-    val key: String
-        get() = items.joinToString("-") { it.key?.toString() ?: it.hashCode().toString() }
+    val key: String by lazy {
+        // Optimization: Use buildString for efficient string concatenation
+        buildString(capacity = items.size * 10) {
+            items.forEachIndexed { index, item ->
+                if (index > 0) append('-')
+                append(item.key?.toString() ?: item.hashCode())
+            }
+        }
+    }
 }
