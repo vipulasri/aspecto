@@ -9,6 +9,11 @@ plugins {
     alias(libs.plugins.mavenPublish)
 }
 
+composeCompiler {
+    reportsDestination = layout.buildDirectory.dir("compose_compiler")
+    metricsDestination = layout.buildDirectory.dir("compose_metrics")
+}
+
 kotlin {
     androidTarget {
         publishLibraryVariants("release")

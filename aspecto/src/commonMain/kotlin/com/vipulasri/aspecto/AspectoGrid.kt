@@ -132,7 +132,7 @@ fun AspectoGrid(
                 contentType = { row -> row.items.firstOrNull()?.contentType }
             ) { row ->
                 AspectoRow(
-                    row = row.items,
+                    row = row,
                     density = density,
                     itemPadding = itemPadding,
                     layoutDirection = layoutDirection
@@ -144,7 +144,7 @@ fun AspectoGrid(
 
 @Composable
 internal fun AspectoRow(
-    row: List<AspectoLayoutInfo>,
+    row: AspectoRow,
     density: Density,
     itemPadding: PaddingValues,
     layoutDirection: LayoutDirection
@@ -152,12 +152,12 @@ internal fun AspectoRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(with(density) { (row.firstOrNull()?.height ?: 0).toDp() }),
+            .height(with(density) { (row.items.firstOrNull()?.height ?: 0).toDp() }),
         horizontalArrangement = Arrangement.spacedBy(
             itemPadding.calculateStartPadding(layoutDirection)
         )
     ) {
-        for (item in row) {
+        for (item in row.items) {
             Box(
                 modifier = Modifier
                     .width(with(density) { item.width.toDp() })
