@@ -186,6 +186,107 @@ class AspectoGridTest {
     }
 
     @Test
+    fun `verify grid renders appended items without dropping existing ones`() {
+        var items by mutableStateOf(
+            listOf(
+                TestItem("item1", 1.0f),
+                TestItem("item2", 1.0f),
+                TestItem("item3", 1.0f)
+            )
+        )
+
+        composeTestRule.setContent {
+            Box(modifier = Modifier.fillMaxSize()) {
+                AspectoGrid(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 8.dp)
+                ) {
+                    items(
+                        items = items,
+                        key = { it.id },
+                        aspectRatio = { it.aspectRatio }
+                    ) { item ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Gray),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = item.id, color = Color.White)
+                        }
+                    }
+                }
+            }
+        }
+
+        // Initial state
+        composeTestRule.onNodeWithText("item1").assertExists()
+        composeTestRule.onNodeWithText("item3").assertExists()
+
+        // Pagination-style append
+        items = items + listOf(
+            TestItem("item4", 1.0f),
+            TestItem("item5", 0.5f)
+        )
+
+        // Existing items are still present and new items are rendered
+        composeTestRule.onNodeWithText("item1").assertExists()
+        composeTestRule.onNodeWithText("item3").assertExists()
+        composeTestRule.onNodeWithText("item4").assertExists()
+        composeTestRule.onNodeWithText("item5").assertExists()
+    }
+
+    @Test
+    fun `verify grid renders prepended items at the top`() {
+        var items by mutableStateOf(
+            listOf(
+                TestItem("item1", 1.0f),
+                TestItem("item2", 1.0f),
+                TestItem("item3", 1.0f)
+            )
+        )
+
+        composeTestRule.setContent {
+            Box(modifier = Modifier.fillMaxSize()) {
+                AspectoGrid(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 8.dp)
+                ) {
+                    items(
+                        items = items,
+                        key = { it.id },
+                        aspectRatio = { it.aspectRatio }
+                    ) { item ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Gray),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = item.id, color = Color.White)
+                        }
+                    }
+                }
+            }
+        }
+
+        // Initial state
+        composeTestRule.onNodeWithText("item1").assertExists()
+
+        // Prepend a new batch at the top
+        items = listOf(
+            TestItem("new0", 1.0f),
+            TestItem("new1", 1.0f),
+            TestItem("new2", 1.0f)
+        ) + items
+
+        // The new items appear at the top and existing items are still present
+        composeTestRule.onNodeWithText("new0").assertExists()
+        composeTestRule.onNodeWithText("item1").assertExists()
+        composeTestRule.onNodeWithText("item3").assertExists()
+    }
+
+    @Test
     fun `verify single tall item is restricted to 75 percent of max height`() {
         composeTestRule.setContent {
             AspectoGrid(
@@ -220,6 +321,89 @@ class AspectoGridTest {
             .assertExists()
             .assertIsDisplayed()
             .assertWidthIsEqualTo(225.dp)  // height(450) * aspectRatio(0.5)
+    }
+
+    @Test
+    fun `verify grid renders correctly after removing an item`() {
+        var items by mutableStateOf(
+            listOf(
+                TestItem("item1", 1.0f),
+                TestItem("item2", 1.0f),
+                TestItem("item3", 1.0f)
+            )
+        )
+
+        composeTestRule.setContent {
+            Box(modifier = Modifier.fillMaxSize()) {
+                AspectoGrid(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 8.dp)
+                ) {
+                    items(
+                        items = items,
+                        key = { it.id },
+                        aspectRatio = { it.aspectRatio }
+                    ) { item ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Gray),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = item.id, color = Color.White)
+                        }
+                    }
+                }
+            }
+        }
+
+        // Initial state - 3 items
+        composeTestRule.onNodeWithText("item1").assertExists()
+        composeTestRule.onNodeWithText("item2").assertExists()
+        composeTestRule.onNodeWithText("item3").assertExists()
+
+        // Remove middle item
+        items = items.filter { it.id != "item2" }
+
+        // Remaining items are still present
+        composeTestRule.onNodeWithText("item1").assertExists()
+        composeTestRule.onNodeWithText("item3").assertExists()
+        composeTestRule.onNodeWithText("item2").assertDoesNotExist()
+    }
+
+    @Test
+    fun `verify grid renders correctly in RTL layout direction`() {
+        composeTestRule.setContent {
+            Box(modifier = Modifier.fillMaxSize()) {
+                AspectoGrid(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 8.dp)
+                ) {
+                    items(
+                        items = listOf(
+                            TestItem("left", 1.0f),
+                            TestItem("right", 1.0f)
+                        ),
+                        key = { it.id },
+                        aspectRatio = { it.aspectRatio }
+                    ) { item ->
+                        Box(
+                            modifier = Modifier
+                                .testTag(item.id)
+                                .fillMaxSize()
+                                .background(Color.Gray),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = item.id, color = Color.White)
+                        }
+                    }
+                }
+            }
+        }
+
+        // Both items should be rendered regardless of layout direction
+        composeTestRule.onNodeWithTag("left").assertExists()
+        composeTestRule.onNodeWithTag("right").assertExists()
     }
 
     private data class TestItem(

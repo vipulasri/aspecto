@@ -1,21 +1,46 @@
 package com.vipulasri.aspecto.sample
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
@@ -26,11 +51,15 @@ import coil3.util.DebugLogger
 import com.vipulasri.aspecto.AspectoGrid
 import com.vipulasri.aspecto.sample.ui.theme.AspectoTheme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
 
-/**
- * Created by Vipul Asri on 30/12/24.
- */
+private const val PAGE_SIZE = 20
+private const val MAX_PAGES = 6
+private const val REMOVE_SIZE = 10
+private const val LOAD_DELAY_MS = 600L
+private const val APPEND_THRESHOLD_ROWS = 3
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun App() {
     setSingletonImageLoaderFactory { context ->
@@ -41,22 +70,60 @@ fun App() {
     }
 
     AspectoTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
+        ArtworkScreen()
+    }
+}
 
-            var items by remember { mutableStateOf(getItems().take(20)) }
+@Composable
+fun ArtworkScreen() {
+    val state = rememberLazyListState()
 
-            LaunchedEffect(Unit) {
-                delay(2000)
-                items += getItems().takeLast(20)
+    var items by remember { mutableStateOf(getItems().take(PAGE_SIZE)) }
+    var currentPage by remember { mutableStateOf(1) }
+    var isAppending by remember { mutableStateOf(false) }
+
+    // Append pagination: when the last visible row is within APPEND_THRESHOLD_ROWS of the end.
+    LaunchedEffect(state) {
+        snapshotFlow {
+            val layoutInfo = state.layoutInfo
+            val total = layoutInfo.totalItemsCount
+            val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+            total > 0 && lastVisible >= 0 && lastVisible >= total - APPEND_THRESHOLD_ROWS
+        }
+            .distinctUntilChanged()
+            .collect { shouldLoad ->
+                if (shouldLoad && !isAppending && currentPage < MAX_PAGES) {
+                    isAppending = true
+                    delay(LOAD_DELAY_MS)
+                    currentPage += 1
+                    val newItems = getItems().take(PAGE_SIZE).map { it.copy(id = "append-${currentPage}-${it.id}") }
+                    items += newItems
+                    isAppending = false
+                }
             }
+    }
 
+    fun removeLast() {
+        if (items.isEmpty()) return
+        items = items.take((items.size - REMOVE_SIZE).coerceAtLeast(0))
+    }
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            AppTopAppBar(
+                itemCount = items.size,
+                canRemove = items.isNotEmpty(),
+                onRemove = ::removeLast
+            )
+        }
+    ) { padding ->
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             AspectoGrid(
-                modifier = Modifier.padding(padding),
+                modifier = Modifier.fillMaxSize(),
+                state = state,
                 maxRowHeight = 250.dp,
-                itemPadding = PaddingValues(
-                    horizontal = 4.dp,
-                    vertical = 4.dp
-                ),
+                itemPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
                 contentPadding = PaddingValues(4.dp)
             ) {
                 items(
@@ -64,22 +131,102 @@ fun App() {
                     key = { it.id },
                     aspectRatio = { it.aspectRatio }
                 ) { item ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                    ) {
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalPlatformContext.current)
-                                .data(item.imageUrl)
-                                .build(),
-                            contentDescription = item.title,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
+                    ArtworkItem(item = item)
                 }
             }
+
+            // Bottom loading indicator (append)
+            AnimatedVisibility(
+                visible = isAppending,
+                enter = slideInVertically { it } + fadeIn(),
+                exit = slideOutVertically { it } + fadeOut(),
+                modifier = Modifier.align(Alignment.BottomCenter)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "Loading page ${currentPage + 1}…",
+                        modifier = Modifier.padding(start = 12.dp),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+fun AppTopAppBar(
+    itemCount: Int,
+    canRemove: Boolean,
+    onRemove: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            Column {
+                Text("Aspecto Demo", fontWeight = FontWeight.Bold)
+                Text(
+                    text = "$itemCount items",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        },
+        actions = {
+            IconButton(onClick = onRemove, enabled = canRemove) {
+                Icon(Icons.Default.Delete, contentDescription = "Remove last $REMOVE_SIZE items")
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            titleContentColor = MaterialTheme.colorScheme.onSurface
+        )
+    )
+}
+
+@Composable
+fun ArtworkItem(item: Artwork) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalPlatformContext.current)
+                .data(item.imageUrl)
+                .build(),
+            contentDescription = item.title,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.45f))
+                .padding(8.dp),
+            contentAlignment = Alignment.BottomStart
+        ) {
+            Text(
+                text = item.title,
+                color = Color.White,
+                fontWeight = FontWeight.Medium,
+                fontSize = 12.sp,
+                maxLines = 2,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+            )
         }
     }
 }
@@ -167,7 +314,7 @@ private fun getItems(): List<Artwork> {
         Artwork(
             id = "14",
             aspectRatio = 1611f / 2000f,
-            imageUrl = "https://uploads1.wikiart.org/images/edvard-munch/the-scream-1893(2).jpg",
+            imageUrl = "https://uploads1.wikart.org/images/edvard-munch/the-scream-1893(2).jpg",
             title = "The Scream"
         ),
         Artwork(
