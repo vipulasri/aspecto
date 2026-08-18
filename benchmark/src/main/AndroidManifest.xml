@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Self-instrumenting setup (see androidx.benchmark.macro.Macrobenchmark):
+         the benchmark test APK must instrument itself, never the app under test.
+         `android.experimental.self-instrumenting` in build.gradle.kts keeps the
+         test in its own process so macrobenchmark can kill/launch the app. -->
+    <instrumentation
+        android:name="androidx.test.runner.AndroidJUnitRunner"
+        android:targetPackage="com.vipulasri.aspecto.benchmark.test" />
+
+</manifest>

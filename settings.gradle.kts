@@ -22,3 +22,5 @@ dependencyResolutionManagement {
 rootProject.name = "Aspecto"
 include(":sample")
 include(":aspecto")
+include(":benchmarkApp")
+include(":benchmark")

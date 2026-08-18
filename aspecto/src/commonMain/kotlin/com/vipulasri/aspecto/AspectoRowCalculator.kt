@@ -43,6 +43,7 @@ internal fun calculateRows(
 ): List<AspectoRow> {
     val minRowHeight = (maxRowHeight * 0.5f).toInt()
     val rows = ArrayList<AspectoRow>(items.size / 2 + 1)
+    val rowKeys = HashSet<Any>()
     var currentIndex = 0
 
     while (currentIndex < items.size) {
@@ -69,13 +70,28 @@ internal fun calculateRows(
                 // Stable identity for the lazy list: the first item's key, or its index when no
                 // key is provided. Never derived from item hash codes, so row keys do not change
                 // between recompositions and appended items do not disturb existing rows.
-                key = items[currentIndex].key ?: currentIndex
+                key = rowKey(items, currentIndex, rowKeys)
             )
         )
         currentIndex = rowConfig.endIndex
     }
 
     return rows
+}
+
+private fun rowKey(
+    items: List<AspectoLayoutInfo>,
+    index: Int,
+    seen: HashSet<Any>
+): Any {
+    val key = items[index].key ?: index
+    check(seen.add(key)) {
+        "Duplicate row key '$key' detected for the item at index $index. Row keys are derived " +
+            "from each row's first item key, so items with duplicate keys in different rows " +
+            "produce conflicting keys for the underlying LazyColumn, which would crash. Use " +
+            "unique keys in AspectoLayoutScope.items(key = ...) or omit them."
+    }
+    return key
 }
 
 private data class RowConfiguration(

@@ -3,6 +3,7 @@ package com.vipulasri.aspecto
 import androidx.compose.runtime.Composable
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class AspectoRowCalculatorTest {
@@ -373,6 +374,37 @@ class AspectoRowCalculatorTest {
         // Then - remaining items are present
         val keys = updatedRows.flatMap { row -> row.items.map { it.key } }
         assertEquals(listOf("a", "c"), keys)
+    }
+
+    @Test
+    fun `should throw on duplicate keys across different rows`() {
+
+        // Given - very wide items, each filling its own row, sharing a key
+        val items = listOf(
+            createTestItem(aspectRatio = 2.0f, key = "dup"),
+            createTestItem(aspectRatio = 2.0f, key = "dup")
+        )
+
+        // Then - conflicting row keys must fail fast with a clear message
+        val exception = assertFailsWith<IllegalStateException> { layout(items) }
+        assertTrue(exception.message.orEmpty().contains("Duplicate row key 'dup'"))
+    }
+
+    @Test
+    fun `should allow same key for items within one row`() {
+
+        // Given - two items sharing a key that land in the same row
+        val items = listOf(
+            createTestItem(aspectRatio = 1.0f, key = "same"),
+            createTestItem(aspectRatio = 1.0f, key = "same")
+        )
+
+        // When
+        val rows = layout(items)
+
+        // Then - single row, key derived from first item, no conflict
+        assertEquals(1, rows.size)
+        assertEquals("same", rows[0].key)
     }
 
     private fun createTestItem(
