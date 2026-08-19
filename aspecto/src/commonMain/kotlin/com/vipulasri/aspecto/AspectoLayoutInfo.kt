@@ -22,6 +22,12 @@ import androidx.compose.runtime.Stable
 /**
  * Represents an item in the AspectGrid layout.
  *
+ * Annotated with [Stable] so the Compose compiler can skip recomposition when instances are
+ * equal. Because [content] is a composable lambda, equality is reference-based: two instances
+ * with different lambda references are considered different even if they produce the same
+ * output. This is the intended behavior — new lambdas from the caller signal fresh state that
+ * should trigger recomposition.
+ *
  * @param aspectRatio The width to height ratio of the item
  * @param key Unique identifier for the item, used for efficient updates
  * @param contentType Type of content for recomposition optimization
@@ -89,11 +95,12 @@ class AspectoLayoutScope {
         itemContent: @Composable (T) -> Unit
     ) {
         items.forEach { item ->
-            validate(aspectRatio(item))
+            val ratio = aspectRatio(item)
+            validate(ratio)
             _items.add(
                 AspectoLayoutInfo(
                     key = key?.invoke(item),
-                    aspectRatio = aspectRatio(item),
+                    aspectRatio = ratio,
                     contentType = contentType?.invoke(item),
                     content = { itemContent(item) }
                 )

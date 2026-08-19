@@ -16,16 +16,18 @@
 
 package com.vipulasri.aspecto
 
+import androidx.compose.runtime.Stable
+
 /**
  * Represents a row in the AspectGrid layout.
- * Contains a list of items with their calculated dimensions.
  *
  * @param items List of layout items in this row
+ * @param key Stable identity for the row, derived from the first item's [AspectoLayoutInfo.key]
+ * (or its index when no key is provided). Used as the lazy list item key so that appended items do
+ * not invalidate existing rows.
  */
+@Stable
 internal data class AspectoRow(
-    val items: List<AspectoLayoutInfo> = emptyList()
-) {
-    /** Unique identifier for the row, derived from item keys */
-    val key: String
-        get() = items.joinToString("-") { it.key?.toString() ?: it.hashCode().toString() }
-}
+    val items: List<AspectoLayoutInfo> = emptyList(),
+    val key: Any
+)

@@ -9,6 +9,11 @@ plugins {
     alias(libs.plugins.mavenPublish)
 }
 
+composeCompiler {
+    reportsDestination = layout.buildDirectory.dir("compose_compiler")
+    metricsDestination = layout.buildDirectory.dir("compose_metrics")
+}
+
 kotlin {
     androidTarget {
         publishLibraryVariants("release")
@@ -98,4 +103,11 @@ android {
     }
     testOptions.unitTests.isIncludeAndroidResources = true
     testOptions.unitTests.isReturnDefaultValues = true
+}
+
+tasks.withType<Test>().configureEach {
+    testLogging {
+        showStandardStreams = true
+        events("passed", "skipped", "failed")
+    }
 }

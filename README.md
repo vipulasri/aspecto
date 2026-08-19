@@ -17,7 +17,7 @@ https://github.com/user-attachments/assets/58cd864b-0a82-431b-ac6e-de755f885b98
 
 - **Aspect Ratio Preservation** - Maintains natural dimensions of images
 - **Smart Row Distribution** - Magically arranges items for optimal space utilization
-- ️**Efficient Updates** - Uses incremental calculations for smooth performance
+- ️**Efficient Updates** - Pure layout recomputation; growing the list never invalidates already-rendered rows
 - **Height Protection** - Guards against overly tall items disrupting layouts
 - **Responsive Layout** - Adapts gracefully to different screen sizes
 
