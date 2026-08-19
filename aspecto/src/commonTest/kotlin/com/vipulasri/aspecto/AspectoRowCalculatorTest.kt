@@ -407,6 +407,108 @@ class AspectoRowCalculatorTest {
         assertEquals("same", rows[0].key)
     }
 
+    @Test
+    fun `should reject negative aspect ratio`() {
+        val scope = AspectoLayoutScope()
+        assertFailsWith<IllegalArgumentException> {
+            scope.item(aspectRatio = -1f) { }
+        }
+    }
+
+    @Test
+    fun `should reject zero aspect ratio`() {
+        val scope = AspectoLayoutScope()
+        assertFailsWith<IllegalArgumentException> {
+            scope.item(aspectRatio = 0f) { }
+        }
+    }
+
+    @Test
+    fun `contentType should be preserved on each item through layout`() {
+
+        // Given
+        val items = listOf(
+            AspectoLayoutInfo(
+                aspectRatio = 1.0f,
+                key = "a",
+                contentType = "image",
+                content = @Composable {}
+            ),
+            AspectoLayoutInfo(
+                aspectRatio = 1.0f,
+                key = "b",
+                contentType = "text",
+                content = @Composable {}
+            ),
+            AspectoLayoutInfo(
+                aspectRatio = 1.0f,
+                key = "c",
+                contentType = "image",
+                content = @Composable {}
+            )
+        )
+
+        // When
+        val rows = layout(items)
+
+        // Then - contentType is carried through to the laid-out items
+        val resultContentTypes = rows.flatMap { row -> row.items.map { it.contentType } }
+        assertEquals(listOf("image", "text", "image"), resultContentTypes)
+    }
+
+    @Test
+    fun `singular item function should produce correct layout`() {
+
+        // Given - use singular item() instead of items()
+        val scope = AspectoLayoutScope()
+        scope.item(aspectRatio = 1.0f, key = "x", contentType = "photo") { }
+        scope.item(aspectRatio = 1.0f, key = "y", contentType = "photo") { }
+
+        // When
+        val rows = calculateRows(
+            items = scope.items,
+            availableWidth = AVAILABLE_WIDTH,
+            maxRowHeight = MAX_ROW_HEIGHT,
+            horizontalPadding = HORIZONTAL_PADDING
+        )
+
+        // Then - two items in one row, content types preserved
+        assertEquals(1, rows.size)
+        assertEquals(2, rows[0].items.size)
+        assertEquals("x", rows[0].items[0].key)
+        assertEquals("y", rows[0].items[1].key)
+        assertEquals("photo", rows[0].items[0].contentType)
+        assertEquals("photo", rows[0].items[1].contentType)
+    }
+
+    @Test
+    fun `asymmetric horizontal padding should use only start side`() {
+
+        // Given - items that fill the row with small padding
+        val items = List(3) { createTestItem(aspectRatio = 1.0f) }
+
+        // When - start padding = 2
+        val rowsSmall = calculateRows(
+            items = items,
+            availableWidth = AVAILABLE_WIDTH,
+            maxRowHeight = MAX_ROW_HEIGHT,
+            horizontalPadding = 2
+        )
+
+        // When - start padding = 20
+        val rowsLarge = calculateRows(
+            items = items,
+            availableWidth = AVAILABLE_WIDTH,
+            maxRowHeight = MAX_ROW_HEIGHT,
+            horizontalPadding = 20
+        )
+
+        // Then - larger start padding yields smaller per-item widths (end padding ignored)
+        val avgWidthSmall = rowsSmall.flatMap { it.items.map { item -> item.width } }.average()
+        val avgWidthLarge = rowsLarge.flatMap { it.items.map { item -> item.width } }.average()
+        assertTrue(avgWidthSmall > avgWidthLarge)
+    }
+
     private fun createTestItem(
         aspectRatio: Float,
         key: String? = null
