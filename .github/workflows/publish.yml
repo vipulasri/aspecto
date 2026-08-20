@@ -2,17 +2,22 @@ name: Publish
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
 
 jobs:
   publish:
-    name: Publish
+    name: Bump, Tag & Publish
     runs-on: macos-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - name: Setup JDK 17
         uses: actions/setup-java@v4
@@ -22,20 +27,43 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Extract version from tag
-        id: version
+      - name: Check if commit is version bump
+        id: check
         run: |
-          TAG="${GITHUB_REF#refs/tags/v}"
-          echo "version=$TAG" >> "$GITHUB_OUTPUT"
+          AUTHOR=$(git log -1 --format='%an')
+          if [ "$AUTHOR" = "github-actions[bot]" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Update VERSION_NAME in gradle.properties
+      - name: Bump patch version
+        if: steps.check.outputs.skip == 'false'
+        id: bump
         run: |
-          sed -i '' "s/^VERSION_NAME=.*/VERSION_NAME=${{ steps.version.outputs.version }}/" gradle.properties
+          CURRENT=$(grep '^VERSION_NAME=' gradle.properties | cut -d'=' -f2)
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+          NEW_PATCH=$((PATCH + 1))
+          NEW_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}"
+          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          sed -i '' "s/^VERSION_NAME=.*/VERSION_NAME=$NEW_VERSION/" gradle.properties
+
+      - name: Commit and tag
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add gradle.properties
+          git commit -m "chore: bump version to ${{ steps.bump.outputs.version }}"
+          git tag "v${{ steps.bump.outputs.version }}"
+          git push --follow-tags
 
       - name: Build and Check
+        if: steps.check.outputs.skip == 'false'
         run: ./gradlew build
 
       - name: Publish to Maven Central
+        if: steps.check.outputs.skip == 'false'
         run: ./gradlew publish --no-configuration-cache
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
@@ -44,20 +72,9 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.GPG_KEY_ID }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_KEY_PASSWORD }}
 
-  release:
-    name: Create Release
-    needs: publish
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       - name: Create GitHub Release
+        if: steps.check.outputs.skip == 'false'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ steps.bump.outputs.version }}
           generate_release_notes: true
