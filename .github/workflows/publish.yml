@@ -5,10 +5,16 @@ on:
     branches:
       - main
 
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-test:
     name: Build & Test
-    if: github.event.head_commit.author.username != 'github-actions[bot]'
+    if: >-
+      github.event.head_commit.author.username != 'github-actions[bot]' &&
+      !startsWith(github.event.head_commit.message, 'chore: bump version')
     runs-on: macos-latest
 
     steps:
@@ -53,7 +59,17 @@ jobs:
           echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
           sed -i '' "s/^VERSION_NAME=.*/VERSION_NAME=$NEW_VERSION/" gradle.properties
 
+      - name: Check if tag already exists
+        id: tag_check
+        run: |
+          if git rev-parse "v${{ steps.bump.outputs.version }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish to Maven Central
+        if: steps.tag_check.outputs.exists == 'false'
         run: ./gradlew publish --no-configuration-cache
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
@@ -64,10 +80,12 @@ jobs:
 
     outputs:
       version: ${{ steps.bump.outputs.version }}
+      published: ${{ steps.tag_check.outputs.exists == 'false' }}
 
   release:
     name: Tag & Release
     needs: publish
+    if: needs.publish.outputs.published == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
