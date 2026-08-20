@@ -1,7 +1,10 @@
 name: Publish
 
-on: workflow_dispatch
-        
+on:
+  push:
+    tags:
+      - 'v*'
+
 jobs:
   publish:
     name: Publish
@@ -19,6 +22,16 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          echo "version=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Update VERSION_NAME in gradle.properties
+        run: |
+          sed -i '' "s/^VERSION_NAME=.*/VERSION_NAME=${{ steps.version.outputs.version }}/" gradle.properties
+
       - name: Build and Check
         run: ./gradlew build
 
@@ -30,3 +43,21 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.GPG_KEY_ID }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_KEY_PASSWORD }}
+
+  release:
+    name: Create Release
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
