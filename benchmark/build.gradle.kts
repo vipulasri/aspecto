@@ -3,13 +3,12 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.test")
-    alias(libs.plugins.kotlin.android)
 }
 
 android {
     namespace = "com.vipulasri.aspecto.benchmark.test"
     targetProjectPath = ":benchmarkApp"
-    compileSdk = 36
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     // Enable the benchmark to run separately from the app process.
     experimentalProperties["android.experimental.self-instrumenting"] = true

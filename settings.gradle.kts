@@ -20,7 +20,8 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Aspecto"
-include(":sample")
+include(":shared")
+include(":androidApp")
 include(":aspecto")
 include(":benchmarkApp")
 include(":benchmark")
