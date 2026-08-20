@@ -41,11 +41,6 @@ kotlin {
         withHostTest {
             isIncludeAndroidResources = true
         }
-        withDeviceTestBuilder {
-            sourceSetTreeName = "test"
-        }.configure {
-            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        }
     }
 
     sourceSets {
@@ -70,14 +65,6 @@ kotlin {
             implementation(libs.robolectric)
             implementation(libs.androidx.compose.ui.test.junit4.android)
         }
-
-        getByName("androidDeviceTest").dependencies {
-            implementation(libs.androidx.compose.material3)
-            implementation(libs.junit)
-            implementation(libs.androidx.junit)
-            implementation(libs.robolectric)
-            implementation(libs.androidx.compose.ui.test.junit4.android)
-        }
     }
 }
 
@@ -90,5 +77,4 @@ tasks.withType<Test>().configureEach {
 
 dependencies {
     add("androidHostTestImplementation", platform(libs.androidx.compose.bom))
-    add("androidDeviceTestImplementation", platform(libs.androidx.compose.bom))
 }
