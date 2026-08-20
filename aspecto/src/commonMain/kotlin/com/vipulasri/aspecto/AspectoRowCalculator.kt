@@ -34,12 +34,16 @@ internal const val DEFAULT_MAX_ROW_HEIGHT_PX = 600
  * @param availableWidth Available width for the rows, in pixels.
  * @param maxRowHeight Maximum allowed height for any row, in pixels.
  * @param horizontalPadding Spacing between items within a row, in pixels.
+ * @param decorations Full-width row decorations to insert at specific row positions.
+ *   Each decoration is inserted before the regular row at its [RowDecoration.index].
+ *   Sorted by index internally; empty list means no decorations.
  */
 internal fun calculateRows(
     items: List<AspectoLayoutInfo>,
     availableWidth: Int,
     maxRowHeight: Int = DEFAULT_MAX_ROW_HEIGHT_PX,
-    horizontalPadding: Int = 0
+    horizontalPadding: Int = 0,
+    decorations: List<RowDecoration> = emptyList()
 ): List<AspectoRow> {
     val minRowHeight = (maxRowHeight * 0.5f).toInt()
     val rows = ArrayList<AspectoRow>(items.size / 2 + 1)
@@ -76,7 +80,7 @@ internal fun calculateRows(
         currentIndex = rowConfig.endIndex
     }
 
-    return rows
+    return spliceDecorations(rows, decorations, rowKeys)
 }
 
 private fun rowKey(
@@ -221,4 +225,69 @@ private fun calculateRowHeight(
     }
 
     return rowHeight.coerceIn(minRowHeight.toFloat(), maxRowHeight.toFloat())
+}
+
+/**
+ * Inserts [RowDecoration] rows into the computed regular rows at the specified positions.
+ *
+ * Each decoration is placed before the regular row at its [RowDecoration.index]. Decorations
+ * with indices beyond the last regular row are appended at the end.
+ *
+ * @param rows The computed regular rows.
+ * @param decorations The decorations to splice in, sorted by [RowDecoration.index].
+ * @param existingKeys The set of keys already used by regular rows, used to detect collisions.
+ * @return A new list with decorations inserted at the correct positions.
+ */
+private fun spliceDecorations(
+    rows: List<AspectoRow>,
+    decorations: List<RowDecoration>,
+    existingKeys: HashSet<Any>
+): List<AspectoRow> {
+    if (decorations.isEmpty()) return rows
+
+    val sorted = decorations.sortedBy { it.index }
+    val result = ArrayList<AspectoRow>(rows.size + sorted.size)
+    var regularRowCounter = 0
+    var decorationIdx = 0
+
+    for (row in rows) {
+        while (decorationIdx < sorted.size && sorted[decorationIdx].index == regularRowCounter) {
+            val decKey = sorted[decorationIdx].key
+            check(existingKeys.add(decKey)) {
+                "Duplicate row key '$decKey' detected for decoration at index " +
+                    "${sorted[decorationIdx].index}. Decoration keys must be unique and must " +
+                    "not collide with item-derived row keys."
+            }
+            result.add(
+                AspectoRow(
+                    items = emptyList(),
+                    key = decKey,
+                    isFullWidth = true
+                )
+            )
+            decorationIdx++
+        }
+        result.add(row)
+        regularRowCounter++
+    }
+
+    // Append remaining decorations (index >= regular row count)
+    while (decorationIdx < sorted.size) {
+        val decKey = sorted[decorationIdx].key
+        check(existingKeys.add(decKey)) {
+            "Duplicate row key '$decKey' detected for decoration at index " +
+                "${sorted[decorationIdx].index}. Decoration keys must be unique and must " +
+                "not collide with item-derived row keys."
+        }
+        result.add(
+            AspectoRow(
+                items = emptyList(),
+                key = decKey,
+                isFullWidth = true
+            )
+        )
+        decorationIdx++
+    }
+
+    return result
 }

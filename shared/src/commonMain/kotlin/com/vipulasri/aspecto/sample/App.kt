@@ -49,6 +49,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.util.DebugLogger
 import com.vipulasri.aspecto.AspectoGrid
+import com.vipulasri.aspecto.RowDecoration
 import com.vipulasri.aspecto.sample.ui.theme.AspectoTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -58,6 +59,7 @@ private const val MAX_PAGES = 6
 private const val REMOVE_SIZE = 10
 private const val LOAD_DELAY_MS = 600L
 private const val APPEND_THRESHOLD_ROWS = 3
+private const val AD_INTERVAL_ROWS = 3
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
@@ -81,6 +83,7 @@ fun ArtworkScreen() {
     var items by remember { mutableStateOf(getItems().take(PAGE_SIZE)) }
     var currentPage by remember { mutableStateOf(1) }
     var isAppending by remember { mutableStateOf(false) }
+    var decorations by remember { mutableStateOf(emptyList<RowDecoration>()) }
 
     // Append pagination: when the last visible row is within APPEND_THRESHOLD_ROWS of the end.
     LaunchedEffect(state) {
@@ -98,6 +101,38 @@ fun ArtworkScreen() {
                     currentPage += 1
                     val newItems = getItems().take(PAGE_SIZE).map { it.copy(id = "append-${currentPage}-${it.id}") }
                     items += newItems
+
+                    // Update decorations: add ad after every AD_INTERVAL_ROWS
+                    val totalItems = items.size
+                    val estimatedRows = totalItems / 3 // rough estimate: ~3 items per row
+                    val newDecorations = mutableListOf<RowDecoration>()
+                    var row = AD_INTERVAL_ROWS
+                    while (row < estimatedRows) {
+                        newDecorations.add(
+                            RowDecoration(
+                                index = row,
+                                key = "ad-${row}",
+                                contentType = "ad"
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(MaterialTheme.colorScheme.primaryContainer)
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Advertisement (row $row)",
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        )
+                        row += AD_INTERVAL_ROWS
+                    }
+                    decorations = newDecorations
+
                     isAppending = false
                 }
             }
@@ -124,7 +159,8 @@ fun ArtworkScreen() {
                 state = state,
                 maxRowHeight = 250.dp,
                 itemPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
-                contentPadding = PaddingValues(4.dp)
+                contentPadding = PaddingValues(4.dp),
+                decorations = decorations
             ) {
                 items(
                     items = items,

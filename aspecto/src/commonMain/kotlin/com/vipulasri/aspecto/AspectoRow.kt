@@ -25,9 +25,12 @@ import androidx.compose.runtime.Stable
  * @param key Stable identity for the row, derived from the first item's [AspectoLayoutInfo.key]
  * (or its index when no key is provided). Used as the lazy list item key so that appended items do
  * not invalidate existing rows.
+ * @param isFullWidth Whether this row is a full-width decoration row (not part of the
+ * aspect-ratio grid). Full-width rows render their content at the full available width.
  */
 @Stable
 internal data class AspectoRow(
     val items: List<AspectoLayoutInfo> = emptyList(),
-    val key: Any
+    val key: Any,
+    val isFullWidth: Boolean = false
 )
