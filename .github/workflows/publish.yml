@@ -7,7 +7,7 @@ on:
 
 jobs:
   publish:
-    name: Bump, Tag & Publish
+    name: Build, Publish & Release
     runs-on: macos-latest
     permissions:
       contents: write
@@ -37,6 +37,10 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Build and Test
+        if: steps.check.outputs.skip == 'false'
+        run: ./gradlew build
+
       - name: Bump patch version
         if: steps.check.outputs.skip == 'false'
         id: bump
@@ -48,20 +52,6 @@ jobs:
           echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
           sed -i '' "s/^VERSION_NAME=.*/VERSION_NAME=$NEW_VERSION/" gradle.properties
 
-      - name: Commit and tag
-        if: steps.check.outputs.skip == 'false'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add gradle.properties
-          git commit -m "chore: bump version to ${{ steps.bump.outputs.version }}"
-          git tag "v${{ steps.bump.outputs.version }}"
-          git push --follow-tags
-
-      - name: Build and Check
-        if: steps.check.outputs.skip == 'false'
-        run: ./gradlew build
-
       - name: Publish to Maven Central
         if: steps.check.outputs.skip == 'false'
         run: ./gradlew publish --no-configuration-cache
@@ -71,6 +61,16 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.GPG_KEY_ID }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_KEY_PASSWORD }}
+
+      - name: Commit and tag
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add gradle.properties
+          git commit -m "chore: bump version to ${{ steps.bump.outputs.version }}"
+          git tag "v${{ steps.bump.outputs.version }}"
+          git push --follow-tags
 
       - name: Create GitHub Release
         if: steps.check.outputs.skip == 'false'
