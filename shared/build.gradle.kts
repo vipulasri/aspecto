@@ -8,6 +8,13 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
 }
 
+configurations.configureEach {
+    exclude(group = "androidx.compose.runtime", module = "runtime-saveable")
+    exclude(group = "androidx.savedstate", module = "savedstate")
+    exclude(group = "androidx.lifecycle", module = "lifecycle-common")
+    exclude(group = "androidx.lifecycle", module = "lifecycle-runtime")
+}
+
 kotlin {
     listOf(
         iosArm64(),
