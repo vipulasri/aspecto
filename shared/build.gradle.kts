@@ -45,6 +45,7 @@ kotlin {
             implementation(libs.compose.material)
             implementation(libs.compose.material.icons)
             implementation(libs.bundles.coil)
+            implementation(libs.compose.ui.tooling.preview)
         }
 
         commonTest.dependencies {
@@ -58,4 +59,8 @@ kotlin {
             implementation(libs.ktor.client.ios)
         }
     }
+}
+
+dependencies {
+    androidRuntimeClasspath(libs.compose.ui.tooling)
 }
