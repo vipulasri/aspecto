@@ -60,13 +60,19 @@ import androidx.compose.ui.unit.dp
  * padding value is used (consistent with [Arrangement.spacedBy]). For vertical spacing between
  * rows, only the top padding value is used. Asymmetric start/end or top/bottom values are
  * supported but only the start/top side is applied to inter-item and inter-row spacing.
+ * @param decorations Full-width row decorations to insert at specific row positions. Each
+ * decoration is rendered at the full available width before the regular row at its specified index.
+ * Useful for inserting ads, headers, footers, or loaders between grid rows.
  * @param content The grid content using [AspectoLayoutScope]
  *
  * Example usage:
  * ```
  * AspectoGrid(
  *     modifier = Modifier.fillMaxWidth(),
- *     contentPadding = PaddingValues(8.dp)
+ *     contentPadding = PaddingValues(8.dp),
+ *     decorations = listOf(
+ *         RowDecoration(index = 3, key = "ad-1") { AdBanner() }
+ *     )
  * ) {
  *     items(
  *         items = imageList,
@@ -89,6 +95,7 @@ fun AspectoGrid(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     maxRowHeight: Dp = DEFAULT_MAX_ROW_HEIGHT_PX.dp,
     itemPadding: PaddingValues = PaddingValues(0.dp),
+    decorations: List<RowDecoration> = emptyList(),
     content: AspectoLayoutScope.() -> Unit
 ) {
     val scope = AspectoLayoutScope().apply(content)
@@ -118,8 +125,12 @@ fun AspectoGrid(
             items = scope.items,
             availableWidth = availableWidth,
             maxRowHeight = maxRowHeightPx,
-            horizontalPadding = horizontalPaddingPx
+            horizontalPadding = horizontalPaddingPx,
+            decorations = decorations
         )
+
+        // Build a lookup map for decoration content by key
+        val decorationMap = decorations.associateBy { it.key }
 
         LazyColumn(
             state = state,
@@ -129,14 +140,29 @@ fun AspectoGrid(
             items(
                 items = rows,
                 key = { row -> row.key },
-                contentType = { row -> row.items.firstOrNull()?.contentType }
+                contentType = { row ->
+                    if (row.isFullWidth) {
+                        decorationMap[row.key]?.contentType
+                    } else {
+                        row.items.firstOrNull()?.contentType
+                    }
+                }
             ) { row ->
-                AspectoRow(
-                    row = row,
-                    density = density,
-                    itemPadding = itemPadding,
-                    layoutDirection = layoutDirection
-                )
+                if (row.isFullWidth) {
+                    val decoration = decorationMap[row.key]
+                    if (decoration != null) {
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            decoration.content()
+                        }
+                    }
+                } else {
+                    AspectoRow(
+                        row = row,
+                        density = density,
+                        itemPadding = itemPadding,
+                        layoutDirection = layoutDirection
+                    )
+                }
             }
         }
     }

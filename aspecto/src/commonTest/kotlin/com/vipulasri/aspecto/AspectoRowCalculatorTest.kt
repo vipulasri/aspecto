@@ -509,6 +509,221 @@ class AspectoRowCalculatorTest {
         assertTrue(avgWidthSmall > avgWidthLarge)
     }
 
+    // region Decoration tests
+
+    @Test
+    fun `should insert decoration at correct row index`() {
+
+        // Given - 4 items that produce 2 rows (3+1)
+        val items = List(4) { createTestItem(aspectRatio = 1.0f, key = "item$it") }
+        val decorations = listOf(
+            RowDecoration(index = 1, key = "dec-0") { }
+        )
+
+        // When
+        val rows = layoutWithDecorations(items, decorations)
+
+        // Then - decoration appears between row 0 and row 1
+        assertEquals(3, rows.size)
+        assertEquals(false, rows[0].isFullWidth)
+        assertEquals(true, rows[1].isFullWidth)
+        assertEquals("dec-0", rows[1].key)
+        assertEquals(false, rows[2].isFullWidth)
+    }
+
+    @Test
+    fun `should insert decoration before first row when index is 0`() {
+
+        // Given
+        val items = List(3) { createTestItem(aspectRatio = 1.0f, key = "item$it") }
+        val decorations = listOf(
+            RowDecoration(index = 0, key = "header") { }
+        )
+
+        // When
+        val rows = layoutWithDecorations(items, decorations)
+
+        // Then
+        assertEquals(2, rows.size)
+        assertEquals(true, rows[0].isFullWidth)
+        assertEquals("header", rows[0].key)
+        assertEquals(false, rows[1].isFullWidth)
+    }
+
+    @Test
+    fun `should append decoration after last row when index exceeds row count`() {
+
+        // Given - 3 items that produce 1 row
+        val items = List(3) { createTestItem(aspectRatio = 1.0f, key = "item$it") }
+        val decorations = listOf(
+            RowDecoration(index = 5, key = "footer") { }
+        )
+
+        // When
+        val rows = layoutWithDecorations(items, decorations)
+
+        // Then
+        assertEquals(2, rows.size)
+        assertEquals(false, rows[0].isFullWidth)
+        assertEquals(true, rows[1].isFullWidth)
+        assertEquals("footer", rows[1].key)
+    }
+
+    @Test
+    fun `should insert multiple decorations at different indices`() {
+
+        // Given - 6 items that produce 2 rows (3+3)
+        val items = List(6) { createTestItem(aspectRatio = 1.0f, key = "item$it") }
+        val decorations = listOf(
+            RowDecoration(index = 0, key = "header") { },
+            RowDecoration(index = 1, key = "ad-1") { },
+            RowDecoration(index = 2, key = "footer") { }
+        )
+
+        // When
+        val rows = layoutWithDecorations(items, decorations)
+
+        // Then - header, row0, ad-1, row1, footer
+        assertEquals(5, rows.size)
+        assertEquals(listOf(true, false, true, false, true), rows.map { it.isFullWidth })
+        assertEquals(listOf("header", "ad-1", "footer"), rows.filter { it.isFullWidth }.map { it.key })
+    }
+
+    @Test
+    fun `should not affect regular row layout when decorations are present`() {
+
+        // Given
+        val items = List(4) { createTestItem(aspectRatio = 1.0f, key = "item$it") }
+        val decorations = listOf(
+            RowDecoration(index = 1, key = "ad") { }
+        )
+
+        // When
+        val rowsWithDecorations = layoutWithDecorations(items, decorations)
+        val rowsWithout = layout(items)
+
+        // Then - regular rows should have identical dimensions
+        val regularRowsWith = rowsWithDecorations.filter { !it.isFullWidth }
+        assertEquals(rowsWithout.size, regularRowsWith.size)
+        for (i in rowsWithout.indices) {
+            assertEquals(rowsWithout[i].items.size, regularRowsWith[i].items.size)
+            assertEquals(rowsWithout[i].items.map { it.width }, regularRowsWith[i].items.map { it.width })
+            assertEquals(rowsWithout[i].items.map { it.height }, regularRowsWith[i].items.map { it.height })
+        }
+    }
+
+    @Test
+    fun `empty decorations list should produce same result as no decorations`() {
+
+        // Given
+        val items = List(4) { createTestItem(aspectRatio = 1.0f, key = "item$it") }
+
+        // When
+        val rowsEmpty = layoutWithDecorations(items, emptyList())
+        val rowsDefault = layout(items)
+
+        // Then
+        assertEquals(rowsDefault.size, rowsEmpty.size)
+        assertEquals(rowsDefault.map { it.key }, rowsEmpty.map { it.key })
+    }
+
+    @Test
+    fun `decoration keys should not collide with item-derived row keys`() {
+
+        // Given - items without keys (row keys derived from index)
+        val items = List(3) { createTestItem(aspectRatio = 1.0f) }
+        val decorations = listOf(
+            RowDecoration(index = 0, key = 0) { } // key = 0 collides with first item row key
+        )
+
+        // Then - should throw due to duplicate key
+        val exception = assertFailsWith<IllegalStateException> {
+            layoutWithDecorations(items, decorations)
+        }
+        assertTrue(exception.message.orEmpty().contains("Duplicate row key"))
+    }
+
+    @Test
+    fun `decorations with non colliding keys should work`() {
+
+        // Given
+        val items = List(3) { createTestItem(aspectRatio = 1.0f, key = "item$it") }
+        val decorations = listOf(
+            RowDecoration(index = 1, key = "dec-unique") { }
+        )
+
+        // When
+        val rows = layoutWithDecorations(items, decorations)
+
+        // Then
+        val allKeys = rows.map { it.key }
+        assertEquals(2, allKeys.distinct().size)
+    }
+
+    @Test
+    fun `should handle decoration at every row position`() {
+
+        // Given - 6 items producing 2 rows, decoration between each
+        val items = List(6) { createTestItem(aspectRatio = 1.0f, key = "item$it") }
+        val decorations = listOf(
+            RowDecoration(index = 0, key = "d0") { },
+            RowDecoration(index = 1, key = "d1") { },
+            RowDecoration(index = 2, key = "d2") { }
+        )
+
+        // When
+        val rows = layoutWithDecorations(items, decorations)
+
+        // Then - d0, row0, d1, row1, d2
+        assertEquals(5, rows.size)
+        assertEquals(
+            listOf("d0", "item0", "d1", "item3", "d2"),
+            rows.map { it.key }
+        )
+    }
+
+    @Test
+    fun `should handle multiple decorations at same index`() {
+
+        // Given
+        val items = List(3) { createTestItem(aspectRatio = 1.0f, key = "item$it") }
+        val decorations = listOf(
+            RowDecoration(index = 0, key = "d-a") { },
+            RowDecoration(index = 0, key = "d-b") { }
+        )
+
+        // When
+        val rows = layoutWithDecorations(items, decorations)
+
+        // Then - both decorations before row 0
+        assertEquals(3, rows.size)
+        assertEquals(true, rows[0].isFullWidth)
+        assertEquals("d-a", rows[0].key)
+        assertEquals(true, rows[1].isFullWidth)
+        assertEquals("d-b", rows[1].key)
+        assertEquals(false, rows[2].isFullWidth)
+    }
+
+    @Test
+    fun `should handle out of order decorations by sorting them`() {
+
+        // Given
+        val items = List(6) { createTestItem(aspectRatio = 1.0f, key = "item$it") }
+        val decorations = listOf(
+            RowDecoration(index = 1, key = "d-last") { },
+            RowDecoration(index = 0, key = "d-first") { }
+        )
+
+        // When
+        val rows = layoutWithDecorations(items, decorations)
+
+        // Then - sorted: d-first before row0, d-last before row1
+        assertEquals(4, rows.size)
+        assertEquals(listOf("d-first", "item0", "d-last", "item3"), rows.map { it.key })
+    }
+
+    // endregion
+
     private fun createTestItem(
         aspectRatio: Float,
         key: String? = null
@@ -517,5 +732,16 @@ class AspectoRowCalculatorTest {
         key = key,
         contentType = null,
         content = @Composable {}
+    )
+
+    private fun layoutWithDecorations(
+        items: List<AspectoLayoutInfo>,
+        decorations: List<RowDecoration>
+    ) = calculateRows(
+        items = items,
+        availableWidth = AVAILABLE_WIDTH,
+        maxRowHeight = MAX_ROW_HEIGHT,
+        horizontalPadding = HORIZONTAL_PADDING,
+        decorations = decorations
     )
 }

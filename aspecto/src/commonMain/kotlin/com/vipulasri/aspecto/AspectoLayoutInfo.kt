@@ -46,6 +46,26 @@ data class AspectoLayoutInfo(
 )
 
 /**
+ * Represents a full-width row decoration inserted at a specific row position in the grid.
+ *
+ * Decorations are inserted before the regular row at the given [index]. For example, a decoration
+ * at `index = 3` appears between regular row 2 and regular row 3.
+ *
+ * @param index Row position (0-based) to insert this decoration before
+ * @param key Unique identifier for this decoration row, used for lazy list identity.
+ *   Must not collide with keys from grid items.
+ * @param contentType Type of content for recomposition optimization (optional)
+ * @param content Composable content to be displayed at full width
+ */
+@Stable
+data class RowDecoration(
+    val index: Int,
+    val key: Any,
+    val contentType: Any? = null,
+    val content: @Composable () -> Unit
+)
+
+/**
  * Scope for building grid content with aspect ratio-based items.
  */
 class AspectoLayoutScope {
